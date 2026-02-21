@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIED Keystroke Analysis</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#94a3b8;--accent:#3b82f6;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--purple:#a855f7;--cyan:#06b6d4}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:1px solid var(--border)}
+header h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+header p{color:var(--muted);margin-top:8px}
+nav{display:flex;gap:8px;justify-content:center;padding:16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+nav button{padding:8px 20px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:8px;cursor:pointer;font-size:.875rem;transition:all .2s}
+nav button:hover,nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.section{display:none;padding:30px 0}
+.section.active{display:block}
+.grid{display:grid;gap:20px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(400px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.card h3{font-size:1rem;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.stat{font-size:2.5rem;font-weight:700;color:var(--accent)}
+.stat-sm{font-size:1.2rem;color:var(--muted)}
+.chart-container{position:relative;height:350px}
+.chart-container-lg{position:relative;height:500px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.05em}
+td{color:var(--text)}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.tag-correct{background:#22c55e22;color:var(--green)}
+.tag-partial{background:#eab30822;color:var(--yellow)}
+.tag-incorrect{background:#ef444422;color:var(--red)}
+.tag-idk{background:#94a3b822;color:var(--muted)}
+.tag-paste{background:#3b82f622;color:var(--accent)}
+.tag-typed{background:#a855f722;color:var(--purple)}
+.response-text{font-size:.85rem;color:var(--text);line-height:1.5;max-width:400px}
+.keystroke-timeline{display:flex;flex-wrap:wrap;gap:2px;padding:8px 0}
+.key{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 4px;border-radius:4px;font-size:.65rem;font-family:monospace;background:#334155;color:var(--text)}
+.key-backspace{background:#ef444433;color:var(--red)}
+.key-paste{background:#3b82f633;color:var(--accent)}
+.key-copy{background:#22c55e33;color:var(--green)}
+.key-modifier{background:#a855f733;color:var(--purple)}
+.key-space{background:#1e293b;color:var(--muted);min-width:12px}
+.participant-select{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.participant-select button{padding:6px 14px;border:1px solid var(--border);background:transparent;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.8rem}
+.participant-select button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.q-label{font-size:.75rem;color:var(--cyan);font-weight:600;margin-bottom:4px}
+.scroll-x{overflow-x:auto}
+</style>
+</head>
+<body>
+<header>
+<h1>AIED Keystroke Analysis Dashboard</h1>
+<p>Survey responses and keystroke behavior for 12 participants interpreting regression coefficients</p>
+</header>
+<nav>
+<button class="active" onclick="showSection('overview')">Overview</button>
+<button onclick="showSection('responses')">Response Quality</button>
+<button onclick="showSection('keystrokes')">Keystroke Behavior</button>
+<button onclick="showSection('timing')">Timing Analysis</button>
+</nav>
+<div class="container">
+
+<div id="overview" class="section active">
+<div class="grid grid-4" style="margin-bottom:24px">
+<div class="card"><h3>Participants</h3><div class="stat">12</div></div>
+<div class="card"><h3>Avg Duration</h3><div class="stat" id="avgDuration"></div><div class="stat-sm">seconds</div></div>
+<div class="card"><h3>Completion Rate</h3><div class="stat">100%</div></div>
+<div class="card"><h3>Paste Users</h3><div class="stat" id="pasteUsers"></div><div class="stat-sm">of 12 participants</div></div>
+</div>
+<div class="grid grid-2">
+<div class="card"><h3>Time Spent per Question per Participant</h3><div class="chart-container"><canvas id="timePerQ"></canvas></div></div>
+<div class="card"><h3>Keypresses vs Time (Paste Detection)</h3><div class="chart-container"><canvas id="keypressVsTime"></canvas></div></div>
+</div>
+</div>
+
+<div id="responses" class="section">
+<div class="card" style="margin-bottom:20px"><h3>Response Quality Legend</h3>
+<span class="tag tag-correct">Correct</span> <span class="tag tag-partial">Partial</span> <span class="tag tag-incorrect">Incorrect</span> <span class="tag tag-idk">I Don't Know</span> <span class="tag tag-paste">Paste</span> <span class="tag tag-typed">Typed</span>
+</div>
+<div class="card scroll-x"><h3>All Responses</h3><table id="responseTable"><thead><tr><th>ID</th><th>Q1: Intercept = 112.6</th><th>Q1 Quality</th><th>Q2: Slope for Income = -1.1</th><th>Q2 Quality</th><th>Q3: Slope for Temp = 1.18</th><th>Q3 Quality</th><th>Method</th></tr></thead><tbody></tbody></table></div>
+</div>
+
+<div id="keystrokes" class="section">
+<div class="participant-select" id="pSelect"></div>
+<div id="keystrokeDetail"></div>
+<div class="card" style="margin-top:20px"><h3>Typing Effort Comparison</h3><div class="chart-container-lg"><canvas id="typingEffort"></canvas></div></div>
+</div>
+
+<div id="timing" class="section">
+<div class="grid grid-2">
+<div class="card"><h3>Total Survey Duration</h3><div class="chart-container"><canvas id="durationChart"></canvas></div></div>
+<div class="card"><h3>Per-Question Time (Page Submit)</h3><div class="chart-container"><canvas id="perQTime"></canvas></div></div>
+</div>
+<div class="card" style="margin-top:20px"><h3>Session Timeline</h3><div class="chart-container"><canvas id="timeline"></canvas></div></div>
+</div>
+
+</div>
+<script>
+const DATA=[
+{id:"p1",start:"2026-02-12 10:39:03",end:"2026-02-12 10:40:44",duration:101,q1:"when income is 0, the model predicts 112.6 murders per million people",q2:"I'm not sure! Something about the rate of change decreasing as income increases.",q3:"Again I'm not sue about slope. I think it's showing that temperature and murder rates are positively correlated.",t1:{fc:35.504,lc:58.97,ps:76.401,cc:2},t2:{fc:1.535,lc:1.535,ps:22.027,cc:1},ks:[{qid:"QID5",keypresses:70,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","o","e","m"," ","i","s"," ","0",","," ","t","h","e"," ","m","o","d","e","l"," ","p","r","e","d","i","c","t","s"," ","1","1","2",".","6"," ","m","u","r","d","e","r","s"," ","p","e","r"," ","m","i","l","l","i","o","n"," ","p","e","o","p","l","e"]},{qid:"QID6",keypresses:83,pastes:0,copies:0,order:["I","'","m"," ","n","o","t"," ","s","u","r","e","!"," ","S","o","m","e","t","h","i","g","n"," ","a","b","o","u","t"," ","t","e","h"," ","r","a","t","e"," ","f","o"," ","c","h","a","n","g","e"," ","d","e","c","r","e","a","s","i","n","g"," ","a","s"," ","i","n","c","o","m","e"," ","i","n","c","r","e","a","s","e","s","."]},{qid:"QID11",keypresses:117,pastes:0,copies:0,order:["A","g","a","i","n"," ","I","'","m"," ","n","o","t"," ","s","u","e"," ","a","b","o","u","t"," ","s","l","o","p","e","."," ","I"," ","h","t","i","n","k"," ","i","t","'","s"," ","s","h","o","w","i","n","g"," ","t","h","a","t"," ","t","e","m","e","p","r","a","t","u","r","e"," ","a","n","d"," ","m","u","r","t","d","Backspace","e","r"," ","r","a","t","e","s"," ","a","r","e"," ","p","o","s","i","t","i","v","e","l","y"," ","c","o","r","r","e","l","a","t","e","d","."]}]},
+{id:"p2",start:"2026-02-12 10:54:28",end:"2026-02-12 10:55:57",duration:88,q1:"112.6 means that if a state had an average family income of $0 (i.e., 0 thousand dollars), the predicted murder rate would be 112.6.",q2:"For each additional $1,000 in average family income, the predicted murder rate decreases by 1.1 units.",q3:"For every 1-unit increase in temperature, the predicted murder rate increases by 1.18 units, on average.",t1:{fc:3.778,lc:44.461,ps:45.733,cc:13},t2:{fc:6.466,lc:34.298,ps:38.985,cc:6},ks:[{qid:"QID5",keypresses:2,pastes:1,copies:0,order:["paste","1"]},{qid:"QID6",keypresses:1,pastes:1,copies:0,order:["paste"]},{qid:"QID11",keypresses:16,pastes:1,copies:0,order:["paste","m","i","r","Backspace","Backspace","u","r","d","e","r"," ","r","a","t","e"]}]},
+{id:"p3",start:"2026-02-12 10:56:10",end:"2026-02-12 10:57:13",duration:62,q1:"If a state had an average family income of $0 (i.e., 0 thousand dollars), the predicted murder rate would be 112.6.",q2:"For each additional $1,000 in average family income, the predicted murder rate decreases by 1.1 units.",q3:"When temp increases by 1, murder rate increases by 1.18.",t1:{fc:5.646,lc:44.561,ps:45.692,cc:11},t2:{fc:1.382,lc:1.382,ps:14.241,cc:1},ks:[{qid:"QID5",keypresses:7,pastes:1,copies:0,order:["paste","Backspace","Delete","Delete","I"]},{qid:"QID6",keypresses:2,pastes:1,copies:0,order:["paste"]},{qid:"QID11",keypresses:57,pastes:0,copies:0,order:["W","h","e","n"," ","t","e","m","p"," ","i","n","c","r","e","a","s","e","s"," ","b","y"," ","1",","," ","m","u","r","d","e","r"," ","r","a","t","e"," ","i","c","n","r","e","a","s","e","s"," ","b","y"," ","1",".","1","8","."]}]},
+{id:"p4",start:"2026-02-12 10:57:19",end:"2026-02-12 10:58:06",duration:46,q1:"When income is 0, temperature is 113.",q2:"When income goes up by 1, murder rate goes down by 1.1",q3:"When temp increases by 1 degree F, murder rate goes up by 1.18 murders per million people.",t1:{fc:1.294,lc:23.461,ps:24.343,cc:3},t2:{fc:1.519,lc:1.519,ps:20.196,cc:1},ks:[{qid:"QID5",keypresses:38,pastes:0,copies:0,order:["W","h","e","n"," ","i","n","c","o","m","e"," ","i","s"," ","0",","," ","t","e","m","p","e","r","a","t","u","r","e"," ","i","s"," ","1","1","3","."]},{qid:"QID6",keypresses:75,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","r","Backspace","o","m","e"," ","g","o","e","s"," ","u","p"," ","b","y"," ","1",","," ","t","e","m","Backspace","Backspace","Backspace","m","u","r","d","e","r"," ","r","a","t","e"," ","g","o","e","s"," ","u","p"," ","b","y"," ","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","d","o","w","n"," ","b","y"," ","1",".","1"]},{qid:"QID11",keypresses:101,pastes:0,copies:0,order:["t","Backspace","W","h","e","n"," ","t","e","m","p"," ","i","n","c","r","e","a","s","e","s"," ","b","y"," ","1","d"," ","e","g","e","r","e"," ","F",","," ","m","u","r","d","e","r","a","Backspace"," ","r","a","t","e"," ","g","o","e","s"," ","u","b"," ","Backspace","Backspace","p"," ","b","y"," ","1",".","1","8"," ","m","u","r","d","e","r","s"," ","e","p","r"," ","m","i","l","l","i","o","n"," ","p","e","o","p","l","e","."]}]},
+{id:"p5",start:"2026-02-12 10:58:14",end:"2026-02-12 11:01:08",duration:174,q1:"When income is 0, murder rate is 112.6",q2:"When income goes up by 1 murder rate decreases by 1.1",q3:"For every 1-unit increase in temperature, the predicted value of the response variable increases by 1.18 units, on average.",t1:{fc:1.533,lc:1.533,ps:135.18,cc:1},t2:{fc:1.611,lc:33.16,ps:34.788,cc:2},ks:[{qid:"QID5",keypresses:39,pastes:0,copies:0,order:["W","h","e","n"," ","i","n","c","o","m","e"," ","i","s"," ","0",","," ","m","u","r","d","e","r"," ","r","a","t","e"," ","i","s"," ","1","1","2",".","6"]},{qid:"QID6",keypresses:63,pastes:0,copies:0,order:["W","h","e","n"," ","i","n","c","o","e","m"," ","g","o","e","s"," ","u","p"," ","b","y"," ","2","Backspace","1"," ","m","u","r","d","e","r"," ","r","a","t","e"," ","i","n","c","Backspace","Backspace","Backspace","d","e","c","r","e","a","s","e","s"," ","b","y"," ","1",".","1"]},{qid:"QID11",keypresses:37,pastes:1,copies:0,order:["H","i","Backspace","Backspace","Backspace","a","s"," ","t","e","m","p","e","r","a","t","u","r","e"," ","g","o","e","s"," ","u","p"," ","b","y"," ","1","paste"]}]},
+{id:"p6",start:"2026-02-12 11:01:24",end:"2026-02-12 11:02:26",duration:61,q1:"The intercept of 112.6 means that when the murder rate is 0, the model predicts an average family income of $112.6 thousand (or $112,600).",q2:"The slope of −1.1 means that for each increase of 1 unit in murder rate, the model predicts that the average family income decreases by 1.1 thousand dollars (or $1,100).",q3:"The slope of 1.18 for temperature means that for each increase of 1 degree in temperature, the model predicts the response variable will increase by 1.18 units, on average.",t1:{fc:1.868,lc:46.935,ps:49.09,cc:8},t2:{fc:1.469,lc:9.086,ps:9.941,cc:5},ks:[{qid:"QID5",keypresses:3,pastes:1,copies:0,order:["paste"]},{qid:"QID6",keypresses:2,pastes:1,copies:0,order:["paste"]},{qid:"QID11",keypresses:2,pastes:1,copies:0,order:["paste"]}]},
+{id:"p7",start:"2026-02-12 11:02:40",end:"2026-02-12 11:03:00",duration:19,q1:"I don't know",q2:"I'm not sure. There's a decrease?",q3:"IDK",t1:{fc:1.222,lc:11.306,ps:11.861,cc:3},t2:{fc:0.139,lc:1.356,ps:2.894,cc:2},ks:[{qid:"QID5",keypresses:13,pastes:0,copies:0,order:["I"," ","d","o","n","'","t"," ","k","n","o","w"]},{qid:"QID6",keypresses:37,pastes:0,copies:0,order:["I","'","m"," ","n","o","t"," ","s","u","r","e","."," ","T","h","e","r","e","'","s"," ","a"," ","d","e","c","r","e","a","s","e","?"]},{qid:"QID11",keypresses:4,pastes:0,copies:0,order:["I","D","K"]}]},
+{id:"p8",start:"2026-02-12 11:03:14",end:"2026-02-12 11:03:46",duration:32,q1:"The murder rate starts at 112.6",q2:"Slope decreases by 1.1",q3:"I'm not sure",t1:{fc:1.661,lc:1.661,ps:25.053,cc:1},t2:{fc:1.262,lc:1.262,ps:3.384,cc:1},ks:[{qid:"QID5",keypresses:55,pastes:0,copies:0,order:["h","e","l","l","o"," ","w","o","r","l","d","!","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","Backspace","T","h","e"," ","m","u","r","d","e","r"," ","r","a","t","e"," ","s","t","a","r","t","s"," ","a","t"," ","1","1","2",".","6"]},{qid:"QID6",keypresses:24,pastes:0,copies:0,order:["S","l","o","e","p"," ","d","e","c","r","e","a","s","e","s"," ","b","y"," ","1",".","1"]},{qid:"QID11",keypresses:13,pastes:0,copies:0,order:["I","'","m"," ","n","o","t"," ","s","u","r","e"]}]},
+{id:"p9",start:"2026-02-12 11:04:17",end:"2026-02-12 11:05:12",duration:55,q1:"So, 112.6 means that if a state had an average family income of $0 (i.e., 0 thousand dollars), the predicted murder rate would be 112.6.",q2:"The slope tells us how the predicted murder rate changes when income increases by one unit (one unit = $1,000 since income is in thousands).",q3:"For every 1-unit increase in temperature, the predicted value of the response variable increases by 1.18 units, on average.",t1:{fc:1.444,lc:41.343,ps:42.283,cc:2},t2:{fc:6.876,lc:6.876,ps:7.814,cc:1},ks:[{qid:"QID5",keypresses:4,pastes:1,copies:0,order:["paste"]},{qid:"QID6",keypresses:1,pastes:1,copies:0,order:["paste"]},{qid:"QID11",keypresses:1,pastes:1,copies:0,order:["paste"]}]},
+{id:"p10",start:"2026-02-12 11:05:21",end:"2026-02-12 11:06:07",duration:46,q1:"When income goes up murder rate goes down",q2:"When income is 0 murder rate is 1.1",q3:"When temperature increases so does murder rate, by 1.18",t1:{fc:1.024,lc:14.691,ps:29.011,cc:4},t2:{fc:1.261,lc:1.261,ps:14.799,cc:1},ks:[{qid:"QID5",keypresses:56,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","o","e","m"," ","g","o","e","s"," ","u","p"," ","t","e","m","p","e","r","a","t","u","r","e"," ","g","o","e","s"," ","n","Backspace","m","u","r","d","e","r"," ","r","a","t","e"," ","d","o","w","n"]},{qid:"QID6",keypresses:36,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","o","m","e"," ","i","s"," ","0"," ","m","u","r","d","e","r"," ","r","a","t","e"," ","i","s"," ","1",".","1"]},{qid:"QID11",keypresses:68,pastes:0,copies:0,order:["i"," ","d","o","n","'","Backspace","w","h","e","n"," ","t","e","m","p","e","r","a","t","u","r","e"," ","i","n","c","r","e","a","s","e","s"," ","s","o"," ","d","o","e","s"," ","m","u","r","d","e","r"," ","r","a","t","e",","," ","b","y"," ","1",".","1","1","8","Backspace","Backspace","8"]}]},
+{id:"p11",start:"2026-02-12 11:08:34",end:"2026-02-12 11:09:15",duration:41,q1:"When income is 0 that's the murder rate",q2:"When income increases by 1, murder rate drops by 1.1 per million.",q3:"When temperature increases by 1, murder rate per million goes up by 1.18",t1:{fc:1.704,lc:1.704,ps:18.325,cc:1},t2:{fc:1.321,lc:1.321,ps:20.925,cc:1},ks:[{qid:"QID5",keypresses:40,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","o","e","m"," ","i","s"," ","0"," ","t","h","a","t","'","s"," ","t","h","e"," ","m","u","r","d","e","r"," ","r","a","t","e"]},{qid:"QID6",keypresses:69,pastes:0,copies:0,order:["w","h","e","n"," ","i","n","c","o","m","e"," ","i","c","n","r","e","a","s","e","s"," ","b","y"," ","1",","," ","m","u","r","d","e","r"," ","r","a","t","e"," ","d","r","o","p","s"," ","b","y"," ","1",".","1"," ","b","Backspace","e","p","r"," ","m","i","l","l","i","o","n","."]},{qid:"QID11",keypresses:76,pastes:0,copies:0,order:["I","Backspace","w","h","e","n"," ","t","e","m","e","p","r","a","t","u","r","e"," ","i","n","c","r","e","a","s","e","s"," ","b","y"," ","1",","," ","m","u","r","d","e","r"," ","r","a","t","e"," ","e","p","r"," ","m","i","l","l","i","o","n"," ","g","o","e","s"," ","u","p"," ","b","y"," ","1",".","1","8"]}]},
+{id:"p12",start:"2026-02-12 11:09:23",end:"2026-02-12 11:10:49",duration:86,q1:"It's the predicted murder rate for a state with an average income of $0 thousand dollars.",q2:"The slope of –1.1 means that for each additional $1,000 increase in average family income, the predicted murder rate decreases by 1.1 murders per 1 million residents, on average.",q3:"I don't know.",t1:{fc:1.56,lc:59.442,ps:75.701,cc:10},t2:{fc:1.507,lc:1.91,ps:8.197,cc:3},ks:[{qid:"QID5",keypresses:2,pastes:1,copies:0,order:["paste","Backspace"]},{qid:"QID6",keypresses:5,pastes:1,copies:2,order:["copy","copy","paste","Backspace"]},{qid:"QID11",keypresses:16,pastes:0,copies:1,order:["copy","I"," ","d","o","n","'","t"," ","k","n","o","w","."]}]}
+];
+
+// Quality ratings
+const QUALITY={
+p1:{q1:"correct",q2:"partial",q3:"partial"},
+p2:{q1:"correct",q2:"correct",q3:"correct"},
+p3:{q1:"correct",q2:"correct",q3:"correct"},
+p4:{q1:"incorrect",q2:"partial",q3:"correct"},
+p5:{q1:"correct",q2:"partial",q3:"correct"},
+p6:{q1:"incorrect",q2:"incorrect",q3:"partial"},
+p7:{q1:"idk",q2:"idk",q3:"idk"},
+p8:{q1:"partial",q2:"partial",q3:"idk"},
+p9:{q1:"correct",q2:"correct",q3:"correct"},
+p10:{q1:"incorrect",q2:"incorrect",q3:"correct"},
+p11:{q1:"partial",q2:"correct",q3:"correct"},
+p12:{q1:"correct",q2:"correct",q3:"idk"}
+};
+
+const COLORS=['#3b82f6','#22c55e','#ef4444','#eab308','#a855f7','#06b6d4','#f97316','#ec4899','#14b8a6','#8b5cf6','#f43f5e','#84cc16'];
+
+function showSection(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+event.target.classList.add('active');
+}
+
+// Overview
+const avgDur=Math.round(DATA.reduce((s,d)=>s+d.duration,0)/DATA.length);
+document.getElementById('avgDuration').textContent=avgDur;
+const pasteCount=DATA.filter(d=>d.ks.some(k=>k.pastes>0)).length;
+document.getElementById('pasteUsers').textContent=pasteCount;
+
+// Time per question chart
+new Chart(document.getElementById('timePerQ'),{type:'bar',data:{labels:DATA.map(d=>d.id),datasets:[
+{label:'Q1+Q2 (Page Submit)',data:DATA.map(d=>d.t1.ps),backgroundColor:'#3b82f6aa'},
+{label:'Q3 (Page Submit)',data:DATA.map(d=>d.t2.ps),backgroundColor:'#22c55eaa'}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Seconds',color:'#94a3b8'},ticks:{color:'#94a3b8'}}},plugins:{legend:{labels:{color:'#e2e8f0'}}}}});
+
+// Keypresses vs time scatter
+const scatterData=[];
+DATA.forEach(d=>{d.ks.forEach(k=>{
+const time=k.qid==='QID11'?d.t2.ps:d.t1.ps;
+scatterData.push({x:time,y:k.keypresses,label:d.id,paste:k.pastes>0});
+})});
+new Chart(document.getElementById('keypressVsTime'),{type:'scatter',data:{datasets:[
+{label:'Typed',data:scatterData.filter(s=>!s.paste),backgroundColor:'#a855f7aa',pointRadius:6},
+{label:'Pasted',data:scatterData.filter(s=>s.paste),backgroundColor:'#3b82f6aa',pointRadius:8,pointStyle:'triangle'}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Time (s)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Keypresses',color:'#94a3b8'},ticks:{color:'#94a3b8'}}},plugins:{legend:{labels:{color:'#e2e8f0'}},tooltip:{callbacks:{label:ctx=>`${scatterData[ctx.dataIndex]?.label||''}: ${ctx.parsed.y} keys, ${ctx.parsed.x}s`}}}}});
+
+// Response table
+const tbody=document.querySelector('#responseTable tbody');
+DATA.forEach(d=>{
+const q=QUALITY[d.id];
+const hasPaste=d.ks.some(k=>k.pastes>0);
+const tr=document.createElement('tr');
+tr.innerHTML=`<td><strong>${d.id}</strong></td>
+<td class="response-text">${d.q1}</td><td><span class="tag tag-${q.q1}">${q.q1}</span></td>
+<td class="response-text">${d.q2}</td><td><span class="tag tag-${q.q2}">${q.q2}</span></td>
+<td class="response-text">${d.q3}</td><td><span class="tag tag-${q.q3}">${q.q3}</span></td>
+<td><span class="tag ${hasPaste?'tag-paste':'tag-typed'}">${hasPaste?'Paste':'Typed'}</span></td>`;
+tbody.appendChild(tr);
+});
+
+// Keystroke section
+const pSelect=document.getElementById('pSelect');
+DATA.forEach((d,i)=>{
+const btn=document.createElement('button');
+btn.textContent=d.id;
+if(i===0)btn.classList.add('active');
+btn.onclick=()=>{pSelect.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');showKeystroke(d.id)};
+pSelect.appendChild(btn);
+});
+
+function showKeystroke(pid){
+const d=DATA.find(x=>x.id===pid);
+const detail=document.getElementById('keystrokeDetail');
+const qLabels=['Q1: Intercept','Q2: Slope (Income)','Q3: Slope (Temp)'];
+detail.innerHTML=d.ks.map((k,i)=>{
+const timeline=k.order.map(key=>{
+if(key==='Backspace')return`<span class="key key-backspace">⌫</span>`;
+if(key==='paste')return`<span class="key key-paste">📋 PASTE</span>`;
+if(key==='copy')return`<span class="key key-copy">📄 COPY</span>`;
+if(key==='Delete')return`<span class="key key-backspace">DEL</span>`;
+if(['Shift','Meta','Tab','Alt','Control'].includes(key))return`<span class="key key-modifier">${key}</span>`;
+if(key===' ')return`<span class="key key-space">␣</span>`;
+return`<span class="key">${key}</span>`;
+}).join('');
+return`<div class="card" style="margin-bottom:12px">
+<div class="q-label">${qLabels[i]}</div>
+<h3>${k.keypresses} keypresses | ${k.pastes} pastes | ${k.copies} copies</h3>
+<div class="keystroke-timeline">${timeline}</div>
+</div>`;
+}).join('');
+}
+showKeystroke('p1');
+
+// Typing effort chart
+new Chart(document.getElementById('typingEffort'),{type:'bar',data:{labels:DATA.map(d=>d.id),datasets:[
+{label:'Q1 Keypresses',data:DATA.map(d=>d.ks[0].keypresses),backgroundColor:'#3b82f6aa'},
+{label:'Q2 Keypresses',data:DATA.map(d=>d.ks[1].keypresses),backgroundColor:'#22c55eaa'},
+{label:'Q3 Keypresses',data:DATA.map(d=>d.ks[2].keypresses),backgroundColor:'#eab308aa'}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Keypresses',color:'#94a3b8'},ticks:{color:'#94a3b8'}}},plugins:{legend:{labels:{color:'#e2e8f0'}}}}});
+
+// Duration chart
+new Chart(document.getElementById('durationChart'),{type:'bar',data:{labels:DATA.map(d=>d.id),datasets:[{label:'Duration (s)',data:DATA.map(d=>d.duration),backgroundColor:COLORS.map(c=>c+'aa')}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{title:{display:true,text:'Seconds',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}},plugins:{legend:{display:false}}}});
+
+// Per-Q time
+new Chart(document.getElementById('perQTime'),{type:'bar',data:{labels:DATA.map(d=>d.id),datasets:[
+{label:'Q1+Q2 Page Submit',data:DATA.map(d=>d.t1.ps),backgroundColor:'#3b82f6aa'},
+{label:'Q3 Page Submit',data:DATA.map(d=>d.t2.ps),backgroundColor:'#06b6d4aa'}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e2e8f0'}}},scales:{x:{ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Seconds',color:'#94a3b8'},ticks:{color:'#94a3b8'}}}}});
+
+// Timeline
+const baseTime=new Date('2026-02-12T10:39:00').getTime();
+new Chart(document.getElementById('timeline'),{type:'bar',data:{labels:DATA.map(d=>d.id),datasets:[{
+label:'Session',
+data:DATA.map(d=>{const s=(new Date(d.start).getTime()-baseTime)/1000;return[s,s+d.duration]}),
+backgroundColor:COLORS.map(c=>c+'aa')
+}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Seconds from first participant',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{ticks:{color:'#94a3b8'}}},plugins:{legend:{display:false}}}});
+</script>
+</body>
+</html>
