@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIED Keystroke Analysis</title>
+<title>Qualtrics Keystroke Tracker - Cheating Visualization</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
@@ -81,8 +81,9 @@ td{color:var(--text)}
 </head>
 <body>
 <header>
-<h1>AIED Keystroke Analysis Dashboard</h1>
-<p>Upload your Qualtrics survey CSV to visualize keystroke behavior and detect potential cheating</p>
+<h1>Visualize Cheating Data from the Qualtrics Keystroke Tracker</h1>
+<p style="margin-top:8px;font-size:0.95rem">Asher, M., Gold, G., & Carvalho, P. F. (2025). <em>AMPPS</em>. | <a href="https://github.com/masher1/Qualtrics-Keystroke-Tracker" style="color:var(--cyan)">Tool GitHub</a></p>
+<p style="margin-top:4px;font-size:0.85rem;color:var(--muted)">Dashboard: Chen, E., Asher, M., Gold, G., & Carvalho, P. F. (2025). <em>AIED 2025</em>.</p>
 </header>
 
 <div id="uploadArea">
@@ -139,7 +140,10 @@ td{color:var(--text)}
 <div class="card" style="margin-bottom:16px">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
 <h3 style="margin:0">Flagged Participants</h3>
+<div style="display:flex;gap:8px">
 <button class="btn btn-primary btn-sm" onclick="exportFlagged()">📥 Export Flagged CSV</button>
+<button class="btn btn-outline btn-sm" onclick="exportFullReport()">📥 Export Full Report CSV</button>
+</div>
 </div>
 <div class="scroll-x"><table id="flagTable"><thead></thead><tbody></tbody></table></div>
 </div>
@@ -355,6 +359,9 @@ function renderDashboard(DATA,qidList,qLabels){
     {label:'Pasted',data:scatterPaste,backgroundColor:'#3b82f6aa',pointRadius:8,pointStyle:'triangle'}
   ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Text Length (chars)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Keypresses',color:'#94a3b8'},ticks:{color:'#94a3b8'}}},plugins:{legend:{labels:{color:'#e2e8f0'}},tooltip:{callbacks:{label:ctx=>ctx.raw.label+` (${ctx.raw.x} chars, ${ctx.raw.y} keys)`}}}}}));
 
+  // Shared tooltip texts
+  const flagTips={pasted:'Paste events detected — text may be copied from external sources',too_short:'Text length exceeds total keypresses — likely pasted or auto-filled',clean:'No cheating indicators detected'};
+
   // Response table (dynamic)
   const thead=document.querySelector('#responseTable thead');
   const tbody=document.querySelector('#responseTable tbody');
@@ -370,7 +377,6 @@ function renderDashboard(DATA,qidList,qLabels){
       const k=d.ks.find(k=>k.qid===qid);
       html+=`<td class="response-text">${k?esc(k.text):'-'}</td>`;
     });
-    const flagTips={pasted:'Paste events detected — text may be copied from external sources',too_short:'Text length exceeds total keypresses — likely pasted or auto-filled',clean:'No cheating indicators detected'};
     const flagTags=d.flags.map(f=>`<span class="tag tag-${f==='pasted'?'pasted':'too-short'}" title="${flagTips[f]||f}">${f}</span>`).join(' ')||`<span class="tag tag-clean" title="${flagTips.clean}">clean</span>`;
     html+=`<td>${flagTags}</td>`;
     tr.innerHTML=html;
@@ -498,6 +504,27 @@ function showSection(id,btn){
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(btn)btn.classList.add('active');
+}
+
+function exportFullReport(){
+  const {DATA,qLabels,qidList}=PARSED;
+  if(!DATA||!DATA.length){alert('No data loaded');return}
+  const rows=[['participant_id','question','keypresses','text_length','pastes','copies','flag']];
+  DATA.forEach(d=>{
+    d.ks.forEach(k=>{
+      const textLen=(k.text||'').length;
+      const flags=[];
+      if(k.pastes>0)flags.push('pasted');
+      if(textLen>k.keypresses&&textLen>0)flags.push('too_short');
+      rows.push([d.id,qLabels[k.qid]||k.qid,k.keypresses,textLen,k.pastes,k.copies,flags.join('|')||'clean']);
+    });
+  });
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='keystroke_full_report.csv';a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function fetchSample(){
