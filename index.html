@@ -27,8 +27,6 @@ nav button:hover,nav button.active{background:var(--accent);color:#fff;border-co
 .card h3{font-size:1rem;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
 .stat{font-size:2.5rem;font-weight:700;color:var(--accent)}
 .stat-sm{font-size:1.2rem;color:var(--muted)}
-.chart-container{position:relative;height:350px}
-.chart-container-lg{position:relative;height:500px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
 th{color:var(--muted);font-weight:600;text-transform:uppercase;font-size:.75rem;letter-spacing:.05em}
@@ -38,8 +36,6 @@ td{color:var(--text)}
 .tag-pasted{background:#3b82f622;color:var(--accent)}
 .tag-too-short{background:#ef444422;color:var(--red)}
 .tag-clean{background:#22c55e22;color:var(--green)}
-.tag-paste{background:#3b82f622;color:var(--accent)}
-.tag-typed{background:#a855f722;color:var(--purple)}
 .response-text{font-size:.85rem;color:var(--text);line-height:1.5;max-width:400px;word-break:break-word}
 .keystroke-timeline{display:flex;flex-wrap:wrap;gap:2px;padding:8px 0}
 .key{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 4px;border-radius:4px;font-size:.65rem;font-family:monospace;background:#334155;color:var(--text)}
@@ -72,7 +68,14 @@ td{color:var(--text)}
 .error-msg{color:var(--red);margin-top:12px;font-size:.9rem}
 .id-selector{display:flex;align-items:center;gap:12px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px}
 .id-selector label{color:var(--muted);font-size:.85rem;font-weight:600}
-.id-selector select{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.85rem}
+.id-selector select,.id-selector input{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:.85rem}
+.id-selector-wrap{position:relative;display:inline-block}
+.id-selector-wrap input{padding-right:26px;min-width:220px}
+.id-selector-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:.7rem}
+.id-selector-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:6px;max-height:220px;overflow-y:auto;z-index:9999;margin-top:3px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.id-selector-dropdown div{padding:6px 12px;cursor:pointer;font-size:.85rem;color:var(--text)}
+.id-selector-dropdown div:hover{background:var(--accent);color:#fff}
+.id-selector-dropdown div.sel{background:rgba(59,130,246,.2);color:var(--accent)}
 .flag-summary{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 .flag-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 24px;text-align:center}
 .flag-box .num{font-size:2rem;font-weight:700}
@@ -100,13 +103,13 @@ td{color:var(--text)}
     Add the tracker to your Qualtrics survey ↗
   </a>
 </p>
-<p style="margin-top:8px;font-size:.85rem;color:var(--muted)">After collecting data and tracking keystrokes, use this web application to upload your data, review flagged participants, and export a cleaned dataset.</p>
+<p style="margin-top:8px;font-size:.85rem;color:var(--muted)">After collecting data and tracking keystrokes, use this web application to upload your data, review flagged participants, and export a cleaned dataset. <strong style="color:var(--text)">Your data never leaves your browser</strong> — all processing happens locally on your computer.</p>
 </header>
 
 <div id="uploadArea">
 <div class="drop-zone" id="dropZone">
 <h2>📁 Upload Your CSV File</h2>
-<p>Drag and drop your Qualtrics export CSV here, or click to browse. <strong style="color:var(--text)">Your data never leaves your browser</strong> — all processing happens locally on your computer.</p>
+<p>Drag and drop your Qualtrics export CSV here, or click to browse.</p>
 <input type="file" id="fileInput" accept=".csv">
 <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Choose File</button>
 <div id="errorMsg" class="error-msg"></div>
@@ -132,50 +135,54 @@ td{color:var(--text)}
 <nav>
 <button class="active" onclick="showSection('overview',this)">Overview</button>
 <button onclick="showSection('keystrokes',this)">Review Keystrokes</button>
-<button onclick="showSection('cheaters',this)">Finalize & Export</button>
+<button onclick="showSection('cheaters',this)">Finalize &amp; Export</button>
 </nav>
 <div class="container">
 
 <!-- OVERVIEW -->
 <div id="overview" class="section active">
 <div class="grid grid-4" style="margin-bottom:24px">
-<div class="card"><h3>Participants</h3><div class="stat" id="statParticipants">0</div></div>
 <div class="card"><h3>Responses Tracked</h3><div class="stat" id="statQuestions">0</div></div>
-<div class="card"><h3>Flagged for Pasting</h3><div class="stat" id="pasteUsers">0</div><div class="stat-sm" id="pasteTotal">of 0 participants</div></div>
-<div class="card"><h3>Flagged for Short Response</h3><div class="stat" id="shortUsers">0</div><div class="stat-sm" id="shortTotal">of 0 participants</div></div>
+<div class="card"><h3>Total Participants</h3><div class="stat" id="statParticipants">0</div></div>
+<div class="card"><h3>Flagged Participants</h3><div class="stat" id="statFlagged">0</div></div>
 </div>
-<div class="grid grid-2">
-<div class="card"><h3>Keypresses vs Text Length (Paste Detection)</h3><div class="chart-container"><canvas id="keypressVsLen"></canvas></div></div>
+<div class="card" style="margin-bottom:20px"><h3>Cheating Indicator Overlap</h3>
+<div id="flagMatrix"></div>
 </div>
-<div class="card" style="margin-top:20px"><h3>All Responses</h3>
+<div class="card"><h3>All Responses</h3>
 <div class="scroll-x"><table id="responseTable"><thead></thead><tbody></tbody></table></div>
 </div>
 </div>
 
-<!-- FLAGGED CHEATERS -->
+<!-- REVIEW KEYSTROKES -->
+<div id="keystrokes" class="section">
+<div class="participant-select" id="pSelect"></div>
+<div id="keystrokeDetail"></div>
+</div>
+
+<!-- FINALIZE & EXPORT -->
 <div id="cheaters" class="section">
 <div class="flag-summary" id="flagSummary"></div>
 <div class="card" style="margin-bottom:16px">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
 <h3 style="margin:0">Flagged Participants</h3>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<button class="btn btn-primary btn-sm" onclick="openExportModal('flagged')">📥 Export Flagged CSV</button>
-<button class="btn btn-outline btn-sm" onclick="openExportModal('full')">📥 Export Full Report CSV</button>
-<button class="btn btn-outline btn-sm" style="border-color:var(--green);color:var(--green)" onclick="openExportModal('cleaned')">📥 Export Cleaned Dataset</button>
+<button class="btn btn-outline btn-sm" onclick="exportFlaggedNotes()">📋 Export Flagged Notes</button>
+<button class="btn btn-outline btn-sm" style="border-color:var(--green);color:var(--green)" onclick="exportCleaned()">📥 Export Cleaned Dataset</button>
 </div>
 </div>
 <div class="scroll-x"><table id="flagTable"><thead></thead><tbody></tbody></table></div>
 </div>
 <div class="card">
-<h3 style="margin-bottom:12px">Full Keystroke Report (All Participants × All Questions)</h3>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h3 style="margin:0">Full Keystroke Report (All Participants × All Questions)</h3>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-primary btn-sm" onclick="openExportModal('flagged')">📊 Export Keystroke Data (Flagged Only)</button>
+<button class="btn btn-outline btn-sm" onclick="openExportModal('full')">📊 Export Keystroke Data (All Participants)</button>
+</div>
+</div>
 <div class="scroll-x"><table id="fullReportTable"><thead></thead><tbody></tbody></table></div>
 </div>
-</div>
-
-<!-- KEYSTROKE DETAILS -->
-<div id="keystrokes" class="section">
-<div class="participant-select" id="pSelect"></div>
-<div id="keystrokeDetail"></div>
 </div>
 
 </div>
@@ -269,25 +276,63 @@ function parseCSV(text){
 
 function showIdSelector(){
   const area=document.getElementById('idSelectorArea');
-  const sel=document.createElement('select');
-  sel.id='idColSelect';
-  PARSED.headers.forEach(h=>{
-    const o=document.createElement('option');
-    o.value=h;o.textContent=h;
-    if(h===PARSED.defaultIdCol)o.selected=true;
-    sel.appendChild(o);
-  });
-  sel.onchange=()=>renderWithId(sel.value);
   area.innerHTML='';
   const div=document.createElement('div');
   div.className='id-selector';
   div.innerHTML='<label>Participant ID Column:</label>';
-  div.appendChild(sel);
+
+  const wrap=document.createElement('div');
+  wrap.className='id-selector-wrap';
+
+  const inp=document.createElement('input');
+  inp.id='idColSelect';
+  inp.autocomplete='off';
+  inp.value=PARSED.defaultIdCol;
+
+  const arrow=document.createElement('span');
+  arrow.className='id-selector-arrow';
+  arrow.textContent='▾';
+
+  const dd=document.createElement('div');
+  dd.className='id-selector-dropdown';
+
+  let currentVal=PARSED.defaultIdCol;
+
+  function buildOptions(filter){
+    dd.innerHTML='';
+    const q=(filter||'').toLowerCase();
+    PARSED.headers.filter(h=>!q||h.toLowerCase().includes(q)).forEach(h=>{
+      const row=document.createElement('div');
+      row.textContent=h;
+      if(h===currentVal)row.classList.add('sel');
+      row.addEventListener('mousedown',e=>{
+        e.preventDefault();   // keep focus on input, avoid blur
+        currentVal=h;
+        inp.value=h;
+        dd.style.display='none';
+        renderWithId(h);
+      });
+      dd.appendChild(row);
+    });
+    dd.style.display=dd.children.length?'block':'none';
+  }
+
+  inp.addEventListener('focus',()=>{inp.select();buildOptions('');});
+  inp.addEventListener('input',()=>buildOptions(inp.value));
+  inp.addEventListener('blur',()=>{
+    setTimeout(()=>{dd.style.display='none';if(!PARSED.headers.includes(inp.value))inp.value=currentVal;},150);
+  });
+
+  wrap.appendChild(inp);
+  wrap.appendChild(arrow);
+  wrap.appendChild(dd);
+  div.appendChild(wrap);
   area.appendChild(div);
 }
 
 function renderWithId(idCol){
-  const {headers,dataRows,ksIdx,qidToCol,durIdx,timerGroups}=PARSED;
+  const {headers,dataRows,ksIdx,qidToCol,durIdx}=PARSED;
+  PARSED.idCol=idCol;
   const idIdx=headers.indexOf(idCol);
 
   const allQids=new Set();
@@ -343,7 +388,7 @@ function renderWithId(idCol){
     });
     d.flags=[...new Set(d.flags)];
     d.isFlagged=d.flags.length>0;
-    if(d.verdict===undefined)d.verdict=null; // null=unreviewed, 'cheater', 'clean'
+    if(d.verdict===undefined)d.verdict=null;
     if(d.note===undefined)d.note='';
   });
 
@@ -362,27 +407,54 @@ function renderDashboard(DATA,qidList,qLabels){
   const n=DATA.length;
   document.getElementById('statParticipants').textContent=n;
   document.getElementById('statQuestions').textContent=DATA.reduce((s,d)=>s+d.ks.length,0);
-  const pasteCount=DATA.filter(d=>d.flags.includes('pasted')).length;
-  const shortCount=DATA.filter(d=>d.flags.includes('too_short')).length;
-  document.getElementById('pasteUsers').textContent=pasteCount;
-  document.getElementById('pasteTotal').textContent=`of ${n} participants`;
-  document.getElementById('shortUsers').textContent=shortCount;
-  document.getElementById('shortTotal').textContent=`of ${n} participants`;
 
-  // Scatter: keypresses vs text length
-  const scatterTyped=[],scatterPaste=[];
-  DATA.forEach(d=>{d.ks.forEach(k=>{
-    const pt={x:(k.text||'').length,y:k.keypresses,label:d.id+' / '+qLabels[k.qid]};
-    if(k.pastes>0)scatterPaste.push(pt);else scatterTyped.push(pt);
-  })});
-  charts.push(new Chart(document.getElementById('keypressVsLen'),{type:'scatter',data:{datasets:[
-    {label:'Typed',data:scatterTyped,backgroundColor:'#a855f7aa',pointRadius:6},
-    {label:'Pasted',data:scatterPaste,backgroundColor:'#3b82f6aa',pointRadius:8,pointStyle:'triangle'}
-  ]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Text Length (chars)',color:'#94a3b8'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Keypresses',color:'#94a3b8'},ticks:{color:'#94a3b8'}}},plugins:{legend:{labels:{color:'#e2e8f0'}},tooltip:{callbacks:{label:ctx=>ctx.raw.label+` (${ctx.raw.x} chars, ${ctx.raw.y} keys)`}}}}}));
+  // Flagging summary — 2×2 contingency table
+  const flagged=DATA.filter(d=>d.isFlagged);
+  const bothCount=DATA.filter(d=>d.flags.includes('pasted')&&d.flags.includes('too_short')).length;
+  const pasteOnlyCount=DATA.filter(d=>d.flags.includes('pasted')&&!d.flags.includes('too_short')).length;
+  const shortOnlyCount=DATA.filter(d=>!d.flags.includes('pasted')&&d.flags.includes('too_short')).length;
+  const cleanCount=DATA.filter(d=>!d.isFlagged).length;
+  const pasteTotal=pasteOnlyCount+bothCount;
+  const shortTotal=shortOnlyCount+bothCount;
 
-  const flagTips={pasted:'Paste events detected — text may be copied from external sources',too_short:'Text length exceeds total keypresses — likely pasted or auto-filled',clean:'No cheating indicators detected'};
+  document.getElementById('statFlagged').textContent=flagged.length;
+
+  const pct=v=>(v/n*100).toFixed(1)+'%';
+  const matCell=(v,color,bg,bd)=>`<td style="background:${bg};border:1px solid ${bd};border-radius:8px;text-align:center;padding:16px 12px"><div style="font-size:1.8rem;font-weight:700;color:${color}">${v}</div><div style="font-size:.75rem;color:var(--muted)">${pct(v)}</div></td>`;
+  const margCell=v=>`<td style="text-align:center;padding:8px 12px"><div style="font-size:1.1rem;font-weight:600;color:var(--text)">${v}</div><div style="font-size:.75rem;color:var(--muted)">${pct(v)}</div></td>`;
+  const rowHead=(label,sub,color)=>`<th style="text-align:left;font-size:.75rem;letter-spacing:.05em;padding:4px 12px;color:${color};border:none;white-space:nowrap">${label}${sub?`<br><span style="font-weight:400;font-size:.7rem;color:var(--muted);text-transform:none">${sub}</span>`:''}</th>`;
+
+  document.getElementById('flagMatrix').innerHTML=`<table style="width:100%;border-collapse:separate;border-spacing:8px;margin-top:8px">
+    <thead><tr>
+      <th style="border:none;width:130px"></th>
+      <th style="text-align:center;font-size:.75rem;letter-spacing:.05em;padding:4px 8px;color:var(--yellow)">SHORT RESPONSE<br><span style="font-weight:400;font-size:.7rem;color:var(--muted);text-transform:none">chars &gt; keypresses</span></th>
+      <th style="text-align:center;font-size:.75rem;letter-spacing:.05em;padding:4px 8px;color:var(--muted)">NOT SHORT</th>
+      <th style="text-align:center;font-size:.75rem;letter-spacing:.05em;padding:4px 8px;color:var(--muted)">TOTAL</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        ${rowHead('PASTED','pastes &gt; 0','var(--accent)')}
+        ${matCell(bothCount,'var(--red)','rgba(239,68,68,0.12)','rgba(239,68,68,0.35)')}
+        ${matCell(pasteOnlyCount,'var(--accent)','rgba(59,130,246,0.1)','rgba(59,130,246,0.3)')}
+        ${margCell(pasteTotal)}
+      </tr>
+      <tr>
+        ${rowHead('NOT PASTED','','var(--muted)')}
+        ${matCell(shortOnlyCount,'var(--yellow)','rgba(234,179,8,0.1)','rgba(234,179,8,0.3)')}
+        ${matCell(cleanCount,'var(--green)','rgba(34,197,94,0.1)','rgba(34,197,94,0.25)')}
+        ${margCell(n-pasteTotal)}
+      </tr>
+      <tr>
+        ${rowHead('TOTAL','','var(--muted)')}
+        ${margCell(shortTotal)}
+        ${margCell(n-shortTotal)}
+        <td style="text-align:center;padding:8px 12px"><div style="font-size:1.1rem;font-weight:600;color:var(--text)">${n}</div><div style="font-size:.75rem;color:var(--muted)">100%</div></td>
+      </tr>
+    </tbody>
+  </table>`;
 
   // Response table
+  const flagTips={pasted:'Paste events detected — text may be copied from external sources',too_short:'Text length exceeds total keypresses — likely pasted or auto-filled',clean:'No cheating indicators detected'};
   const thead=document.querySelector('#responseTable thead');
   const tbody=document.querySelector('#responseTable tbody');
   let hrow='<tr><th>ID</th>';
@@ -404,7 +476,6 @@ function renderDashboard(DATA,qidList,qLabels){
   });
 
   // Flag summary boxes
-  const flagged=DATA.filter(d=>d.isFlagged);
   const pastedCount=DATA.filter(d=>d.flags.includes('pasted')).length;
   const tooShortCount=DATA.filter(d=>d.flags.includes('too_short')).length;
   document.getElementById('flagSummary').innerHTML=`
@@ -415,8 +486,7 @@ function renderDashboard(DATA,qidList,qLabels){
   `;
 
   // Flag table
-  const fthead=document.querySelector('#flagTable thead');
-  fthead.innerHTML='<tr><th>ID</th><th>Flags</th><th>Details</th><th>Status</th><th>Notes</th></tr>';
+  document.querySelector('#flagTable thead').innerHTML='<tr><th>ID</th><th>Flags</th><th>Details</th><th>Status</th><th>Notes</th></tr>';
   refreshFlagTable();
 
   // Full report table
@@ -436,13 +506,18 @@ function renderDashboard(DATA,qidList,qLabels){
     });
   });
 
-  // Participant selector (flagged → confirmed on top, then flagged, then clean)
+  // Participant selector
   refreshParticipantButtons();
   const sortedData=[...DATA].sort((a,b)=>{
-    if(b.confirmed!==a.confirmed)return b.confirmed-a.confirmed;
-    return b.isFlagged-a.isFlagged;
+    const order=v=>v==='cheater'?0:v===null?1:2;
+    return order(a.verdict)-order(b.verdict)||b.isFlagged-a.isFlagged;
   });
-  if(sortedData.length)showKeystroke(sortedData[0],qLabels);
+  if(sortedData.length){
+    const firstBtn=[...document.querySelectorAll('#pSelect button')]
+      .find(b=>b.textContent===sortedData[0].id);
+    if(firstBtn){firstBtn.classList.add('active');firstBtn.style.cssText=btnStyle(sortedData[0],true);}
+    showKeystroke(sortedData[0],qLabels);
+  }
 }
 
 // ── Keystroke detail view ─────────────────────────────────────────────────────
@@ -452,10 +527,10 @@ function showKeystroke(d,qLabels){
 
   const reviewPanel=d.isFlagged?`
     <div class="review-panel">
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <button class="btn-confirm ${d.verdict==='cheater'?'confirmed':''}" onclick="setVerdict('${esc(d.id)}','cheater')">${d.verdict==='cheater'?'✓ Confirmed Cheater':'Confirm Cheater'}</button>
         <button class="btn-confirm ${d.verdict==='clean'?'confirmed':''}" style="${d.verdict==='clean'?'background:var(--green);color:#fff;border-color:var(--green)':'border-color:var(--green);color:var(--green)'}" onclick="setVerdict('${esc(d.id)}','clean')">${d.verdict==='clean'?'✓ Confirmed Clean':'Confirm Not Cheating'}</button>
-        <span style="font-size:.8rem;color:var(--muted)">${d.verdict==='cheater'?'Will be excluded from cleaned export':d.verdict==='clean'?'Marked as reviewed and clean':'Unreviewed'}</span>
+        <span style="font-size:.8rem;color:var(--muted)">${d.verdict==='cheater'?'Will be excluded from cleaned export':d.verdict==='clean'?'Marked as reviewed and clean':'Unreviewed — click a button to record your determination'}</span>
       </div>
       <div>
         <label style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notes (optional)</label>
@@ -493,12 +568,10 @@ function showKeystroke(d,qLabels){
 
 // ── Review actions ────────────────────────────────────────────────────────────
 
-function setVerdict(id, verdict){
+function setVerdict(id,verdict){
   const d=PARSED.DATA.find(d=>d.id===id);
   if(!d)return;
-  // clicking the same verdict again clears it back to unreviewed
   d.verdict=d.verdict===verdict?null:verdict;
-  d.confirmed=d.verdict==='cheater'; // keep confirmed in sync for export logic
   refreshParticipantButtons();
   showKeystroke(d,PARSED.qLabels);
   refreshFlagTable();
@@ -511,6 +584,13 @@ function saveNote(id){
   refreshFlagTable();
 }
 
+function btnStyle(d,active){
+  if(d.verdict==='cheater')return'background:var(--red);color:#fff;border-color:var(--red)';
+  if(d.verdict==='clean')return'background:var(--green);color:#fff;border-color:var(--green)';
+  if(d.isFlagged)return active?'background:var(--accent);color:#fff;border-color:var(--accent)':'border-color:var(--red);color:var(--red)';
+  return'';
+}
+
 function refreshParticipantButtons(){
   const pSelect=document.getElementById('pSelect');
   const activeId=[...pSelect.querySelectorAll('button')].find(b=>b.classList.contains('active'))?.textContent;
@@ -519,22 +599,25 @@ function refreshParticipantButtons(){
     const order=v=>v==='cheater'?0:v===null?1:2;
     return order(a.verdict)-order(b.verdict)||b.isFlagged-a.isFlagged;
   });
-  sortedData.forEach((d,i)=>{
+  sortedData.forEach(d=>{
     const btn=document.createElement('button');
     btn.textContent=d.id;
-    if(d.id===activeId)btn.classList.add('active');
-    if(d.verdict==='cheater')btn.style.cssText='background:var(--red);color:#fff;border-color:var(--red)';
-    else if(d.verdict==='clean')btn.style.cssText='background:var(--green);color:#fff;border-color:var(--green)';
-    else if(d.isFlagged)btn.style.cssText='border-color:var(--red);color:var(--red)';
+    const active=d.id===activeId;
+    if(active)btn.classList.add('active');
+    btn.style.cssText=btnStyle(d,active);
     btn.onclick=()=>{
-      pSelect.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      pSelect.querySelectorAll('button').forEach(b=>{
+        b.classList.remove('active');
+        const bd=PARSED.DATA.find(dd=>dd.id===b.textContent);
+        if(bd)b.style.cssText=btnStyle(bd,false);
+      });
       btn.classList.add('active');
+      btn.style.cssText=btnStyle(d,true);
       showKeystroke(d,PARSED.qLabels);
     };
     pSelect.appendChild(btn);
   });
 }
-
 
 function refreshFlagTable(){
   const {DATA}=PARSED;
@@ -544,14 +627,20 @@ function refreshFlagTable(){
   ftbody.innerHTML='';
   flagged.forEach(d=>{
     const tr=document.createElement('tr');
-    if(d.confirmed)tr.style.background='rgba(239,68,68,0.08)';
+    if(d.verdict==='cheater')tr.style.background='rgba(239,68,68,0.08)';
+    else if(d.verdict==='clean')tr.style.background='rgba(34,197,94,0.08)';
     const details=[];
     if(d.flagDetails.pasted)details.push('Pasted in: '+d.flagDetails.pasted.join(', '));
     if(d.flagDetails.too_short)details.push('Too short in: '+d.flagDetails.too_short.join(', '));
+    const statusCell=d.verdict==='cheater'
+      ?'<span class="tag" style="background:#ef444422;color:var(--red)">✓ Cheater</span>'
+      :d.verdict==='clean'
+      ?'<span class="tag" style="background:#22c55e22;color:var(--green)">✓ Clean</span>'
+      :'<span style="color:var(--muted);font-size:.8rem">—</span>';
     tr.innerHTML=`<td><strong>${esc(d.id)}</strong></td>
       <td>${d.flags.map(f=>`<span class="tag tag-${f==='pasted'?'pasted':'too-short'}" title="${flagTips[f]||f}">${f}</span>`).join(' ')}</td>
       <td style="font-size:.8rem;color:var(--muted)">${esc(details.join('; '))}</td>
-      <td>${d.verdict==='cheater'?'<span class="tag" style="background:#ef444422;color:var(--red)">✓ Cheater</span>':d.verdict==='clean'?'<span class="tag" style="background:#22c55e22;color:var(--green)">✓ Clean</span>':'<span style="color:var(--muted);font-size:.8rem">—</span>'}</td>
+      <td>${statusCell}</td>
       <td style="font-size:.8rem;color:var(--muted);font-style:italic">${esc(d.note||'')}</td>`;
     ftbody.appendChild(tr);
   });
@@ -570,8 +659,7 @@ function openExportModal(type){
     o.value=h;o.textContent=h;
     sel.appendChild(o);
   });
-  const modal=document.getElementById('exportModal');
-  modal.style.display='flex';
+  document.getElementById('exportModal').style.display='flex';
   document.getElementById('exportConfirmBtn').onclick=()=>{
     const extraIdCol=sel.value||null;
     closeExportModal();
@@ -630,24 +718,38 @@ function exportFullReport(extraIdCol){
   downloadCSV(buildRows(DATA,qLabels,extraIdCol,false),'keystroke_full_report.csv');
 }
 
-function exportCleaned(extraIdCol){
-  const {DATA,headers,dataRows}=PARSED;
+function exportCleaned(){
+  const {DATA,headers,labelRow,importRow,dataRows}=PARSED;
   const confirmed=DATA.filter(d=>d.verdict==='cheater');
-  if(!confirmed.length){alert('No confirmed cheaters to exclude. Use the Keystroke Details tab to confirm cheaters first.');return}
-  const confirmedIds=new Set(confirmed.map(d=>d.id));
-  const currentIdCol=document.getElementById('idColSelect').value;
-  const idIdx=headers.indexOf(currentIdCol);
-
-  // Build header row without keystroke_log column
-  const keepIndices=headers.map((_,i)=>i).filter(i=>i!==PARSED.ksIdx);
-  const headerRow=keepIndices.map(i=>headers[i]);
-  const rows=[headerRow];
-  dataRows.forEach((r,ri)=>{
-    const id=r[idIdx];
-    if(confirmedIds.has(id))return;
-    rows.push(keepIndices.map(i=>r[i]));
-  });
+  if(!confirmed.length){alert('No confirmed cheaters to exclude. Use the Review Keystrokes tab to confirm cheaters first.');return}
+  const excludedRows=new Set(confirmed.map(d=>d.rowIdx));
+  const rows=[headers,labelRow,importRow];
+  dataRows.forEach((r,i)=>{if(!excludedRows.has(i))rows.push(r);});
   downloadCSV(rows,'cleaned_dataset.csv');
+}
+
+function exportFlaggedNotes(){
+  const {DATA,headers,idCol}=PARSED;
+  const flagged=DATA.filter(d=>d.isFlagged);
+  if(!flagged.length){alert('No flagged participants to export.');return}
+  const ridx=headers.indexOf('ResponseId');
+  const hasResponseId=ridx>=0;
+  const hasSecondary=idCol&&idCol!=='ResponseId';
+  const hdr=['ResponseId'];
+  if(hasSecondary)hdr.push(idCol);
+  hdr.push('Flags','Details','Status','Notes');
+  const rows=[hdr];
+  flagged.forEach(d=>{
+    const details=[];
+    if(d.flagDetails.pasted)details.push('Pasted in: '+d.flagDetails.pasted.join(', '));
+    if(d.flagDetails.too_short)details.push('Too short in: '+d.flagDetails.too_short.join(', '));
+    const status=d.verdict==='cheater'?'Cheater':d.verdict==='clean'?'Clean':'Unreviewed';
+    const row=[hasResponseId?d.row[ridx]:d.id];
+    if(hasSecondary)row.push(d.id);
+    row.push(d.flags.join(', '),details.join('; '),status,d.note||'');
+    rows.push(row);
+  });
+  downloadCSV(rows,'flagged_participant_notes.csv');
 }
 
 function downloadCSV(rows,filename){
