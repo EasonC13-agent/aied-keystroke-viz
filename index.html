@@ -83,6 +83,13 @@ td{color:var(--text)}
 .btn-confirm{background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:6px 16px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-confirm.confirmed{background:var(--red);color:#fff}
 .review-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
+.id-link{background:none;border:none;color:var(--accent);cursor:pointer;font-size:inherit;font-weight:600;padding:0;text-decoration:underline;text-underline-offset:3px}
+.id-link:hover{color:var(--cyan)}
+.verdict-select{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+.note-input{background:transparent;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:.8rem;font-style:italic;width:100%;padding:2px 4px;outline:none;min-width:120px}
+.note-input:hover{border-bottom-color:var(--border)}
+.note-input:focus{border-bottom-color:var(--accent);font-style:normal}
+.note-input::placeholder{color:var(--muted);font-style:italic}
 @media(prefers-color-scheme:light){
   :root{--bg:#f1f5f9;--card:#ffffff;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--green:#16a34a;--yellow:#ca8a04;--red:#dc2626;--purple:#9333ea;--cyan:#0891b2}
   header{background:linear-gradient(135deg,#e2e8f0,#f1f5f9)}
@@ -545,8 +552,7 @@ function showKeystroke(d,qLabels){
       </div>
       <div>
         <label style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notes (optional)</label>
-        <textarea id="noteBox" rows="2" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:.85rem;resize:vertical" placeholder="e.g. Pasted full code answer, keystroke count is 3 for a 200-char response...">${esc(d.note)}</textarea>
-        <button class="btn btn-outline btn-sm" style="margin-top:6px" onclick="saveNote('${esc(d.id)}')">Save Note</button>
+        <textarea id="noteBox" rows="2" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:.85rem;resize:vertical" placeholder="e.g. Pasted full code answer, keystroke count is 3 for a 200-char response..." oninput="updateNote('${esc(d.id)}',this.value)">${esc(d.note)}</textarea>
       </div>
     </div>`:'';
 
@@ -593,6 +599,40 @@ function saveNote(id){
   if(!d)return;
   d.note=document.getElementById('noteBox').value;
   refreshFlagTable();
+}
+
+function updateNote(id,value){
+  const d=PARSED.DATA.find(d=>d.id===id);
+  if(!d)return;
+  d.note=value;
+  const noteBox=document.getElementById('noteBox');
+  const activeBtn=document.querySelector('#pSelect button.active');
+  if(noteBox&&activeBtn&&activeBtn.textContent===id)noteBox.value=value;
+  const tableInput=document.querySelector(`.note-input[data-id="${id}"]`);
+  if(tableInput&&tableInput!==document.activeElement)tableInput.value=value;
+}
+
+function setVerdictFromTable(id,verdict){
+  const d=PARSED.DATA.find(d=>d.id===id);
+  if(!d)return;
+  d.verdict=verdict||null;
+  refreshParticipantButtons();
+  refreshFlagTable();
+}
+
+function goToParticipant(id){
+  const navBtn=[...document.querySelectorAll('nav button')].find(b=>b.getAttribute('onclick')?.includes("'keystrokes'"));
+  showSection('keystrokes',navBtn);
+  window.scrollTo({top:0,behavior:'smooth'});
+  const pSelect=document.getElementById('pSelect');
+  pSelect.querySelectorAll('button').forEach(b=>{
+    const bd=PARSED.DATA.find(d=>d.id===b.textContent);
+    const active=b.textContent===id;
+    b.classList.toggle('active',active);
+    if(bd)b.style.cssText=btnStyle(bd,active);
+  });
+  const d=PARSED.DATA.find(d=>d.id===id);
+  if(d)showKeystroke(d,PARSED.qLabels);
 }
 
 function btnStyle(d,active){
@@ -643,16 +683,17 @@ function refreshFlagTable(){
     const details=[];
     if(d.flagDetails.pasted)details.push('Pasted in: '+d.flagDetails.pasted.join(', '));
     if(d.flagDetails.too_short)details.push('Too short in: '+d.flagDetails.too_short.join(', '));
-    const statusCell=d.verdict==='cheater'
-      ?'<span class="tag" style="background:#ef444422;color:var(--red)">✓ Cheater</span>'
-      :d.verdict==='clean'
-      ?'<span class="tag" style="background:#22c55e22;color:var(--green)">✓ Clean</span>'
-      :'<span style="color:var(--muted);font-size:.8rem">—</span>';
-    tr.innerHTML=`<td><strong>${esc(d.id)}</strong></td>
+    const selectStyle=d.verdict==='cheater'?'color:var(--red);border-color:var(--red)':d.verdict==='clean'?'color:var(--green);border-color:var(--green)':'color:var(--muted)';
+    const statusCell=`<select class="verdict-select" style="${selectStyle}" onchange="setVerdictFromTable('${esc(d.id)}',this.value)">
+      <option value="" ${!d.verdict?'selected':''}>— Unreviewed —</option>
+      <option value="cheater" ${d.verdict==='cheater'?'selected':''}>Cheater</option>
+      <option value="clean" ${d.verdict==='clean'?'selected':''}>Clean</option>
+    </select>`;
+    tr.innerHTML=`<td><button class="id-link" onclick="goToParticipant('${esc(d.id)}')">${esc(d.id)}</button></td>
       <td>${d.flags.map(f=>`<span class="tag tag-${f==='pasted'?'pasted':'too-short'}" title="${flagTips[f]||f}">${f}</span>`).join(' ')}</td>
       <td style="font-size:.8rem;color:var(--muted)">${esc(details.join('; '))}</td>
       <td>${statusCell}</td>
-      <td style="font-size:.8rem;color:var(--muted);font-style:italic">${esc(d.note||'')}</td>`;
+      <td><input class="note-input" data-id="${esc(d.id)}" type="text" value="${esc(d.note||'')}" placeholder="Add note…" oninput="updateNote('${esc(d.id)}',this.value)"></td>`;
     ftbody.appendChild(tr);
   });
   if(!flagged.length)ftbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--green)">No flagged participants 🎉</td></tr>';
