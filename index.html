@@ -153,6 +153,7 @@ td{color:var(--text)}
 
 <div id="dashboard">
 <div id="idSelectorArea" class="container" style="padding-bottom:0"></div>
+<div id="metaWarning" class="container" style="padding-top:8px;padding-bottom:0"></div>
 <nav>
 <button class="active" onclick="showSection('overview',this)">Overview</button>
 <button onclick="showSection('keystrokes',this)">Review Keystrokes</button>
@@ -260,26 +261,50 @@ function parseCSV(text){
   try{
     const result=Papa.parse(text,{header:false,skipEmptyLines:true});
     const rows=result.data;
-    if(rows.length<4){showError('CSV needs at least 4 rows (header + labels + import IDs + data)');return}
+    if(rows.length<2){showError('CSV must have at least a header row and one data row.');return}
 
     const headers=rows[0];
-    const labelRow=rows[1];
-    const importRow=rows[2];
-    const dataRows=rows.slice(3);
-
     const ksIdx=headers.indexOf('keystroke_log');
     if(ksIdx===-1){showError('Missing required column: keystroke_log');return}
 
+    // Detect whether Qualtrics extra header rows (labels + import IDs) are present.
+    // The import ID row contains JSON objects like {"ImportId":"QID1_TEXT"}.
+    // If row 2 (index 1) looks like keystroke data instead, there are no extra rows.
+    function looksLikeData(row){try{const p=JSON.parse(row?.[ksIdx]);return Array.isArray(p?.data)}catch(e){return false}}
+    const hasExtraRows=rows.length>=3&&!looksLikeData(rows[1]);
+
+    let labelRow,importRow,dataRows;
+    if(hasExtraRows){
+      labelRow=rows[1];
+      importRow=rows[2];
+      dataRows=rows.slice(3);
+    }else{
+      labelRow=null;
+      importRow=null;
+      dataRows=rows.slice(1);
+    }
+
+    const warningEl=document.getElementById('metaWarning');
+    if(!hasExtraRows){
+      warningEl.innerHTML=`<div style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:8px;padding:10px 16px;font-size:.85rem;color:var(--yellow)">
+        ⚠️ <strong>Qualtrics header rows not detected.</strong> Your file appears to be missing the label and import ID rows that Qualtrics normally includes. Question names cannot be resolved — question IDs (e.g. <code style="font-size:.8rem">QID3</code>) will be shown instead.
+      </div>`;
+    }else{
+      warningEl.innerHTML='';
+    }
+
     const qidToCol={};
-    headers.forEach((h,i)=>{
-      try{
-        const imp=JSON.parse(importRow[i]);
-        if(imp&&imp.ImportId){
-          const m=imp.ImportId.match(/QID\d+/);
-          if(m)qidToCol[m[0]]=h;
-        }
-      }catch(e){}
-    });
+    if(importRow){
+      headers.forEach((h,i)=>{
+        try{
+          const imp=JSON.parse(importRow[i]);
+          if(imp&&imp.ImportId){
+            const m=imp.ImportId.match(/QID\d+/);
+            if(m)qidToCol[m[0]]=h;
+          }
+        }catch(e){}
+      });
+    }
 
     const ID_CANDIDATES=['ResponseId','prolific_id','PROLIFIC_PID','participant_id','ParticipantId','SubjectID'];
     let defaultIdCol=headers[0];
@@ -364,6 +389,12 @@ function renderWithId(idCol){
   PARSED.idCol=idCol;
   const idIdx=headers.indexOf(idCol);
 
+  // Preserve verdicts and notes keyed by rowIdx so switching ID column doesn't lose them
+  const savedState={};
+  if(PARSED.DATA){
+    PARSED.DATA.forEach(d=>{savedState[d.rowIdx]={verdict:d.verdict,note:d.note};});
+  }
+
   const allQids=new Set();
   const DATA=dataRows.map((r,ri)=>{
     let ks=[];
@@ -417,8 +448,9 @@ function renderWithId(idCol){
     });
     d.flags=[...new Set(d.flags)];
     d.isFlagged=d.flags.length>0;
-    if(d.verdict===undefined)d.verdict=null;
-    if(d.note===undefined)d.note='';
+    const saved=savedState[d.rowIdx];
+    d.verdict=saved?saved.verdict:null;
+    d.note=saved?saved.note:'';
   });
 
   PARSED.DATA=DATA;
@@ -801,7 +833,7 @@ function exportCleaned(){
   const confirmed=DATA.filter(d=>d.verdict==='cheater');
   if(!confirmed.length){alert('No confirmed cheaters to exclude. Use the Review Keystrokes tab to confirm cheaters first.');return}
   const excludedRows=new Set(confirmed.map(d=>d.rowIdx));
-  const rows=[headers,labelRow,importRow];
+  const rows=[headers,...(labelRow?[labelRow]:[]),...(importRow?[importRow]:[])];
   dataRows.forEach((r,i)=>{if(!excludedRows.has(i))rows.push(r);});
   downloadCSV(rows,'cleaned_dataset.csv');
 }
