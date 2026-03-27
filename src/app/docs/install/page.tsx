@@ -6,30 +6,29 @@ export default function InstallPage() {
       <h1 className="text-3xl font-bold mb-4">Installation</h1>
       <p className="mb-6">There are several ways to add the Keystroke Tracker SDK to your project.</p>
 
-      <h2 className="text-xl font-semibold mt-8 mb-3">Option 1: Direct Download (Recommended)</h2>
+      <h2 className="text-xl font-semibold mt-8 mb-3">Option 1: npm (Recommended)</h2>
+      <p className="mb-3">Install the SDK from npm:</p>
+      <pre className="mb-6"><code>{`npm install keystroke-tracker-sdk`}</code></pre>
+      <p className="mb-6">This is the recommended approach for most projects. It gives you versioned installs and works cleanly with modern build tools.</p>
+
+      <h2 className="text-xl font-semibold mt-8 mb-3">Option 2: Direct Download</h2>
       <p className="mb-3">
         Download <code>keystroke-core.min.js</code> from the{" "}
         <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/dist/keystroke-core.min.js" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>SDK dist folder</a>{" "}
         and include it in your project:
       </p>
       <pre className="mb-6"><code>{`<script src="path/to/keystroke-core.min.js"></script>`}</code></pre>
-      <p className="mb-6">This is the simplest approach and works with any web platform. The file is less than 3KB minified.</p>
+      <p className="mb-6">Use this when you want a simple script-tag integration or do not use a package manager.</p>
 
-      <h2 className="text-xl font-semibold mt-8 mb-3">Option 2: wget / curl</h2>
-      <p className="mb-3">Download the minified SDK directly from the hosted dashboard:</p>
-      <pre className="mb-3"><code>{`# Download the core SDK (<3KB)
-npm install keystroke-tracker-sdk
-
-# Or with curl
+      <h2 className="text-xl font-semibold mt-8 mb-3">Option 3: wget / curl</h2>
+      <p className="mb-3">Download the minified SDK files directly:</p>
+      <pre className="mb-6"><code>{`# Core SDK
 curl -o keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
 
 # Qualtrics-specific version
 wget -O keystroke-qualtrics.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-qualtrics.min.js"`}</code></pre>
-      <p className="mb-6" style={{ color: "var(--muted)" }}>
-        The npm package will be published after the review process. In the meantime, use direct download or wget from the hosted site.
-      </p>
 
-      <h2 className="text-xl font-semibold mt-8 mb-3">Option 3: Copy from Repository</h2>
+      <h2 className="text-xl font-semibold mt-8 mb-3">Option 4: Copy from Repository</h2>
       <p className="mb-3">Clone or download the repository and copy the files you need:</p>
       <pre className="mb-6"><code>{`# Clone the repository
 git clone <repository-url>

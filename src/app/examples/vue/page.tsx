@@ -125,8 +125,7 @@ function downloadCSV() {
       <h2 className="text-xl font-semibold mt-8 mb-3">Setup</h2>
       <pre className="mb-6"><code>{`npm create vue@latest my-survey
 cd my-survey
-# Download the SDK
-wget -O keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
+npm install keystroke-tracker-sdk
 # Add the components above
 npm run dev`}</code></pre>
 
