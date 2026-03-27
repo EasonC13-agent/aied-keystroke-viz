@@ -184,14 +184,6 @@ export default function Dashboard() {
   /* ─── DASHBOARD ─── */
   return (
     <>
-      <div className="max-w-6xl mx-auto px-5 pt-5">
-        <div className="flex items-center gap-3 p-4 rounded-lg mb-4" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
-          <label className="text-sm font-semibold" style={{ color: "var(--muted)" }}>Participant ID Column:</label>
-          <select value={parsed.idCol} onChange={(e) => changeIdCol(e.target.value)} className="px-3 py-1.5 rounded-md text-sm" style={{ background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)" }}>
-            {parsed.headers.map((h) => <option key={h} value={h}>{h}</option>)}
-          </select>
-        </div>
-      </div>
       <nav className="flex gap-2 justify-center p-4 sticky top-0 z-50" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
         <div className="flex gap-2">
           {(["overview", "keystrokes", "cheaters"] as const).map((s) => (
@@ -209,7 +201,15 @@ export default function Dashboard() {
           <ThemeToggle />
         </div>
       </nav>
-      <div className="max-w-6xl mx-auto px-5 py-6">
+      <div className="max-w-6xl mx-auto px-5 pt-4">
+        <div className="flex items-center gap-3 p-3 rounded-lg mb-4" style={{ background: "var(--card)", border: "1px solid var(--border)" }}>
+          <label className="text-sm font-semibold" style={{ color: "var(--muted)" }}>Participant ID Column:</label>
+          <select value={parsed.idCol} onChange={(e) => changeIdCol(e.target.value)} className="px-3 py-1.5 rounded-md text-sm" style={{ background: "var(--bg)", color: "var(--text)", border: "1px solid var(--border)" }}>
+            {parsed.headers.map((h) => <option key={h} value={h}>{h}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="max-w-6xl mx-auto px-5 pb-6">
         {section === "overview" && <OverviewSection parsed={parsed} getDisplayId={getDisplayId} />}
         {section === "keystrokes" && <KeystrokeSection parsed={parsed} getDisplayId={getDisplayId} rerender={rerender} />}
         {section === "cheaters" && <ExportSection parsed={parsed} getDisplayId={getDisplayId} rerender={rerender} />}
