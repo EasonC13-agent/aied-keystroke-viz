@@ -4,7 +4,7 @@ export default function AngularPage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/angular" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/angular/keystroke-tracker.directive.ts" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
         <span style={{ color: "var(--muted)" }}>·</span>
         <Link href="/examples/angular" style={{ color: "var(--accent)" }}>Example Code ↗</Link>
       </div>

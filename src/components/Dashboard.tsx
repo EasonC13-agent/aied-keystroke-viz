@@ -146,7 +146,7 @@ export default function Dashboard() {
         <header className="text-center py-10 px-5 relative" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
           <div className="absolute top-4 right-4 flex gap-2">
             <Link href="/docs" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--accent)" }}>📖 SDK Docs</Link>
-            <a href="https://anonymous.4open.science/r/aied-keystroke-viz/" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
+            <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
             <button onClick={toggleAnon} className="px-3 py-1.5 border rounded-md text-sm cursor-pointer" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>🔒 Hide Identifiable Info</button>
             <ThemeToggle />
           </div>
@@ -194,7 +194,7 @@ export default function Dashboard() {
         </div>
         <div className="flex gap-2 ml-auto">
           <Link href="/docs" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--accent)" }}>📖 Docs</Link>
-          <a href="https://anonymous.4open.science/r/aied-keystroke-viz/" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
+          <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
           <button onClick={toggleAnon} className="px-3 py-1.5 border rounded-md text-sm cursor-pointer" style={{ borderColor: isAnon ? "var(--accent)" : "var(--border)", background: isAnon ? "var(--accent)" : "var(--card)", color: isAnon ? "#fff" : "var(--muted)" }}>
             {isAnon ? "🔓 Show Original IDs" : "🔒 Hide Identifiable Info"}
           </button>

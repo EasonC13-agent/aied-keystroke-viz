@@ -4,7 +4,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>GitHub ↗</a>
       </div>
 
       <h1 className="text-3xl font-bold mb-4">Using the Dashboard</h1>

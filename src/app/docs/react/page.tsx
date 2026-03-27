@@ -4,7 +4,7 @@ export default function ReactPage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/react" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/react/index.js" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
         <span style={{ color: "var(--muted)" }}>·</span>
         <Link href="/examples/react" style={{ color: "var(--accent)" }}>Live Example ↗</Link>
       </div>

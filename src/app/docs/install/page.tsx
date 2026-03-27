@@ -9,7 +9,7 @@ export default function InstallPage() {
       <h2 className="text-xl font-semibold mt-8 mb-3">Option 1: Direct Download (Recommended)</h2>
       <p className="mb-3">
         Download <code>keystroke-core.min.js</code> from the{" "}
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/dist" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>SDK dist folder</a>{" "}
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/dist/keystroke-core.min.js" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>SDK dist folder</a>{" "}
         and include it in your project:
       </p>
       <pre className="mb-6"><code>{`<script src="path/to/keystroke-core.min.js"></script>`}</code></pre>

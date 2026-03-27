@@ -4,7 +4,7 @@ export default function VanillaExamplePage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/examples/vanilla" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/src/app/examples/vanilla/page.tsx" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
         <span style={{ color: "var(--muted)" }}>·</span>
         <Link href="/docs/vanilla-js" style={{ color: "var(--accent)" }}>Full Documentation ↗</Link>
       </div>

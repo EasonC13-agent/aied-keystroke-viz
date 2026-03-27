@@ -4,9 +4,9 @@ export default function QualtricsPage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/qualtrics" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/sdk/adapters/qualtrics/header.js" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
         <span style={{ color: "var(--muted)" }}>·</span>
-        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/examples/qualtrics" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>Setup Guide ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/src/app/examples/qualtrics/page.tsx" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>Setup Guide ↗</a>
       </div>
 
       <h1 className="text-3xl font-bold mb-4">Qualtrics Integration</h1>
