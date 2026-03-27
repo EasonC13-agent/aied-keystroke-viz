@@ -131,7 +131,8 @@ export default function App() {
       <h2 className="text-xl font-semibold mt-8 mb-3">Setup</h2>
       <pre className="mb-6"><code>{`npx create-react-app my-survey
 cd my-survey
-npm install keystroke-tracker-sdk
+# Download the SDK
+wget -O keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
 # Replace src/App.jsx with the code above
 npm start`}</code></pre>
 

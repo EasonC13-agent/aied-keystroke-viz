@@ -18,13 +18,13 @@ export default function InstallPage() {
       <h2 className="text-xl font-semibold mt-8 mb-3">Option 2: wget / curl</h2>
       <p className="mb-3">Download the minified SDK directly from the hosted dashboard:</p>
       <pre className="mb-3"><code>{`# Download the core SDK (<3KB)
-wget https://keystroke-viz-anon.vercel.app/sdk/dist/keystroke-core.min.js
+wget -O keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
 
 # Or with curl
-curl -O https://keystroke-viz-anon.vercel.app/sdk/dist/keystroke-core.min.js
+curl -o keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
 
 # Qualtrics-specific version
-wget https://keystroke-viz-anon.vercel.app/sdk/dist/keystroke-qualtrics.min.js`}</code></pre>
+wget -O keystroke-qualtrics.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-qualtrics.min.js"`}</code></pre>
       <p className="mb-6" style={{ color: "var(--muted)" }}>
         The npm package will be published after the review process. In the meantime, use direct download or wget from the hosted site.
       </p>
