@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keystroke Tracker - Vanilla JS Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    textarea { width: 100%; height: 120px; font-size: 16px; padding: 8px; margin: 1rem 0; }
+    button { padding: 8px 16px; font-size: 14px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 1rem; overflow: auto; max-height: 300px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Keystroke Tracker Demo</h1>
+  <p>Type in the textarea below. Paste, copy, and switch tabs to see tracking in action.</p>
+
+  <textarea id="tracked-input" placeholder="Type something here..."></textarea>
+  <br>
+  <button id="btn-data">Get Tracking Data</button>
+  <button id="btn-reset">Reset</button>
+
+  <h3>Tracking Data:</h3>
+  <pre id="output">Click "Get Tracking Data" to see results</pre>
+
+  <script src="../../src/core.js"></script>
+  <script>
+    var tracker = new KeystrokeTracker({
+      trackTimestamps: true,
+      trackFocusBlur: true
+    });
+
+    tracker.attach(document.getElementById('tracked-input'));
+
+    document.getElementById('btn-data').addEventListener('click', function() {
+      var data = tracker.getData();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', function() {
+      tracker.reset();
+      document.getElementById('tracked-input').value = '';
+      document.getElementById('output').textContent = 'Reset! Start typing again.';
+    });
+  </script>
+</body>
+</html>

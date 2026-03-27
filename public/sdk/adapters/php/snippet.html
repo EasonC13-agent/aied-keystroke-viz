@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Keystroke Tracker - PHP Integration</title>
+</head>
+<body>
+  <h1>Survey Question</h1>
+  <form id="survey-form">
+    <p>Please describe your experience:</p>
+    <textarea id="response" rows="5" cols="60" placeholder="Type your answer..."></textarea>
+    <br><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script src="dist/keystroke-core.min.js"></script>
+  <script>
+    var tracker = new KeystrokeTracker({
+      trackTimestamps: true,
+      trackFocusBlur: true
+    });
+    tracker.attach(document.getElementById('response'));
+
+    document.getElementById('survey-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      var data = tracker.getData();
+
+      fetch('receive.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(result) {
+        alert('Submitted! ' + result.received);
+      })
+      .catch(function(err) {
+        console.error('Error:', err);
+      });
+    });
+  </script>
+</body>
+</html>
