@@ -143,16 +143,28 @@ export default function Dashboard() {
   if (!parsed) {
     return (
       <>
-        <header className="text-center py-10 px-5 relative" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Link href="/docs" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--accent)" }}>📖 SDK Docs</Link>
-            <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
-            <button onClick={toggleAnon} className="px-3 py-1.5 border rounded-md text-sm cursor-pointer" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>🔒 Hide Identifiable Info</button>
+        <nav className="sticky top-0 z-50 px-6 py-3 flex items-center justify-between" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(12px)" }}>
+          <div className="flex items-center gap-3">
+            <span className="text-lg font-bold" style={{ background: "linear-gradient(135deg, var(--accent), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>⌨️ Keystroke Log Analyzer</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/docs" className="px-3 py-1.5 rounded-md text-sm no-underline inline-flex items-center gap-1.5 transition-all hover:opacity-80" style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)", color: "var(--accent)" }}>📖 Docs</Link>
+            <Link href="/examples" className="px-3 py-1.5 rounded-md text-sm no-underline inline-flex items-center gap-1.5 transition-all hover:opacity-80" style={{ color: "var(--muted)" }}>💡 Examples</Link>
+            <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 rounded-md text-sm no-underline inline-flex items-center gap-1.5 transition-all hover:opacity-80" style={{ color: "var(--muted)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              Source
+            </a>
+            <div className="w-px h-5 mx-1" style={{ background: "var(--border)" }} />
             <ThemeToggle />
           </div>
-          <h1 className="text-3xl font-bold" style={{ background: "linear-gradient(135deg, var(--accent), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Keystroke Log Analyzer</h1>
-          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>A companion dashboard for keystroke-based outsourced responding detection</p>
-          <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>After collecting data and tracking keystrokes, use this web application to upload your data, review flagged participants, and export a cleaned dataset.</p>
+        </nav>
+        <header className="text-center py-12 px-5" style={{ background: "linear-gradient(180deg, var(--card) 0%, var(--bg) 100%)" }}>
+          <h1 className="text-4xl font-bold mb-3" style={{ background: "linear-gradient(135deg, var(--accent), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Keystroke Log Analyzer</h1>
+          <p className="text-base max-w-2xl mx-auto" style={{ color: "var(--muted)" }}>Upload keystroke tracking data, review flagged participants, and export cleaned datasets. All processing happens in your browser.</p>
+          <div className="flex gap-3 justify-center mt-5">
+            <Link href="/docs" className="px-4 py-2 rounded-lg text-sm font-medium no-underline transition-all hover:opacity-90" style={{ background: "var(--accent)", color: "#fff" }}>Get Started →</Link>
+            <Link href="/examples" className="px-4 py-2 rounded-lg text-sm font-medium no-underline border transition-all hover:opacity-80" style={{ borderColor: "var(--border)", color: "var(--muted)" }}>View Examples</Link>
+          </div>
         </header>
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-10">
           <div ref={dropZoneRef} className="border-2 border-dashed rounded-2xl p-14 text-center max-w-xl w-full cursor-pointer transition-all" style={{ borderColor: "var(--border)" }} onClick={() => fileInputRef.current?.click()}>
@@ -184,19 +196,23 @@ export default function Dashboard() {
   /* ─── DASHBOARD ─── */
   return (
     <>
-      <nav className="flex gap-2 justify-center p-4 sticky top-0 z-50" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)" }}>
-        <div className="flex gap-2">
+      <nav className="sticky top-0 z-50 px-6 py-2.5 flex items-center justify-between" style={{ background: "var(--card)", borderBottom: "1px solid var(--border)", backdropFilter: "blur(12px)" }}>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-bold mr-3" style={{ background: "linear-gradient(135deg, var(--accent), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>⌨️</span>
           {(["overview", "keystrokes", "cheaters"] as const).map((s) => (
-            <button key={s} onClick={() => setSection(s)} className="px-5 py-2 border rounded-lg text-sm cursor-pointer transition-all" style={{ borderColor: section === s ? "var(--accent)" : "var(--border)", background: section === s ? "var(--accent)" : "transparent", color: section === s ? "#fff" : "var(--muted)" }}>
+            <button key={s} onClick={() => setSection(s)} className="px-4 py-1.5 rounded-md text-sm cursor-pointer transition-all" style={{ background: section === s ? "var(--accent)" : "transparent", color: section === s ? "#fff" : "var(--muted)", fontWeight: section === s ? 600 : 400 }}>
               {s === "overview" ? "Overview" : s === "keystrokes" ? "Review Keystrokes" : "Finalize & Export"}
             </button>
           ))}
         </div>
-        <div className="flex gap-2 ml-auto">
-          <Link href="/docs" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--accent)" }}>📖 Docs</Link>
-          <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 border rounded-md text-sm no-underline inline-flex items-center" style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}>GitHub</a>
-          <button onClick={toggleAnon} className="px-3 py-1.5 border rounded-md text-sm cursor-pointer" style={{ borderColor: isAnon ? "var(--accent)" : "var(--border)", background: isAnon ? "var(--accent)" : "var(--card)", color: isAnon ? "#fff" : "var(--muted)" }}>
-            {isAnon ? "🔓 Show Original IDs" : "🔒 Hide Identifiable Info"}
+        <div className="flex items-center gap-2">
+          <Link href="/docs" className="px-3 py-1.5 rounded-md text-sm no-underline inline-flex items-center transition-all hover:opacity-80" style={{ color: "var(--accent)" }}>📖 Docs</Link>
+          <a href="https://anonymous.4open.science/r/aied-keystroke-viz/README.md" target="_blank" rel="noopener" className="px-3 py-1.5 rounded-md text-sm no-underline inline-flex items-center gap-1.5 transition-all hover:opacity-80" style={{ color: "var(--muted)" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <div className="w-px h-4 mx-0.5" style={{ background: "var(--border)" }} />
+          <button onClick={toggleAnon} className="px-3 py-1.5 rounded-md text-sm cursor-pointer transition-all" style={{ background: isAnon ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "transparent", color: isAnon ? "var(--accent)" : "var(--muted)" }}>
+            {isAnon ? "🔓 Show IDs" : "🔒 Anonymize"}
           </button>
           <ThemeToggle />
         </div>
