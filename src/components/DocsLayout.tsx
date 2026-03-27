@@ -99,7 +99,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
           </Link>
           <span style={{ color: "var(--muted)" }}>·</span>
           <a
-            href="https://github.com/EasonC13-agent/aied-keystroke-viz"
+            href="https://anonymous.4open.science/r/aied-keystroke-viz/"
             target="_blank"
             rel="noopener"
             style={{ color: "var(--accent)" }}

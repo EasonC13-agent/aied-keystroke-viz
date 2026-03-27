@@ -53,7 +53,7 @@ The SDK source code is included in the [`sdk/`](sdk/) directory, with ready-to-u
 ## Self-Hosting
 
 ```bash
-git clone https://github.com/EasonC13-agent/aied-keystroke-viz.git
+git clone <repository-url>
 cd aied-keystroke-viz
 npm install
 npm run build

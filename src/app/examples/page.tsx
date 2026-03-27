@@ -90,7 +90,7 @@ export default function ExamplesPage() {
         <p style={{ color: "var(--muted)" }}>
           All examples are available in the{" "}
           <a
-            href="https://github.com/EasonC13-agent/aied-keystroke-viz/tree/main/examples"
+            href="https://anonymous.4open.science/r/aied-keystroke-viz/examples"
             target="_blank"
             rel="noopener"
             style={{ color: "var(--accent)" }}

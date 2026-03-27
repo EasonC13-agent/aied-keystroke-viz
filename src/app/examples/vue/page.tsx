@@ -4,7 +4,7 @@ export default function VueExamplePage() {
   return (
     <>
       <div className="flex items-center gap-2 text-sm mb-6">
-        <a href="https://github.com/EasonC13-agent/aied-keystroke-viz/tree/main/examples/vue" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
+        <a href="https://anonymous.4open.science/r/aied-keystroke-viz/examples/vue" target="_blank" rel="noopener" style={{ color: "var(--accent)" }}>View source on GitHub ↗</a>
         <span style={{ color: "var(--muted)" }}>·</span>
         <Link href="/docs/vue" style={{ color: "var(--accent)" }}>Full Documentation ↗</Link>
       </div>
