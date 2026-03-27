@@ -13,10 +13,13 @@ export default function VuePage() {
       <p className="mb-6">Use the <code>useKeystrokeTracker</code> composable in Vue 3 components.</p>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Installation</h2>
-      <pre className="mb-6"><code>{`# Download the SDK
-wget -O keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
-// or
-yarn add keystroke-tracker-sdk`}</code></pre>
+      <pre className="mb-6"><code>{`# Download the SDK to your project
+wget -O public/keystroke-core.min.js \\
+  "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
+
+# Include in your index.html:
+# <script src="/keystroke-core.min.js"></script>
+# The SDK exposes a global KeystrokeTracker class`}</code></pre>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Basic Usage</h2>
       <pre className="mb-6"><code>{`<template>

@@ -14,7 +14,7 @@ export default function VanillaJsPage() {
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Installation</h2>
       <pre className="mb-6"><code>{`// Option 1: Script tag
-<script src="keystroke-tracker.min.js"></script>
+<script src="keystroke-core.min.js"></script>
 
 // Option 2: ES module
 import { KeystrokeTracker } from "./keystroke-tracker.js";`}</code></pre>
@@ -77,7 +77,7 @@ tracker.on("copy", (qid, copiedText) => {
       <pre className="mb-6"><code>{`<!DOCTYPE html>
 <html>
 <head>
-  <script src="keystroke-tracker.min.js"></script>
+  <script src="keystroke-core.min.js"></script>
 </head>
 <body>
   <form id="survey">
