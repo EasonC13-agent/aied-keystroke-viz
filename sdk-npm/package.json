@@ -1,0 +1,24 @@
+{
+  "name": "keystroke-tracker-sdk",
+  "version": "1.0.0",
+  "description": "Lightweight keystroke tracking SDK for web-based surveys. Detect outsourced and AI-assisted responding.",
+  "main": "dist/keystroke-tracker.min.js",
+  "module": "dist/keystroke-tracker.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/keystroke-tracker.esm.js",
+      "require": "./dist/keystroke-tracker.min.js"
+    },
+    "./react": "./adapters/react/index.js",
+    "./vue": "./adapters/vue/index.js",
+    "./angular": "./adapters/angular/index.js",
+    "./qualtrics": "./adapters/qualtrics/header.js",
+    "./vanilla": "./adapters/vanilla/index.js"
+  },
+  "files": [
+    "dist/",
+    "adapters/"
+  ],
+  "keywords": ["keystroke", "tracking", "qualtrics", "react", "vue", "educational-research", "ai-detection"],
+  "license": "MIT"
+}

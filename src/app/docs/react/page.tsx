@@ -13,13 +13,7 @@ export default function ReactPage() {
       <p className="mb-6">Use the <code>useKeystrokeTracker</code> hook in React components.</p>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Installation</h2>
-      <pre className="mb-6"><code>{`# Step 1: Download the SDK to your project's public directory
-wget -O public/keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
-
-# Step 2: Include in your HTML (e.g., public/index.html for CRA, or app/layout.tsx for Next.js)
-# <script src="/keystroke-core.min.js"></script>
-
-# The SDK exposes a global KeystrokeTracker class`}</code></pre>
+      <pre className="mb-6"><code>{`npm install keystroke-tracker-sdk`}</code></pre>
 
       <p className="mb-6">
         Or use the direct download from the{" "}

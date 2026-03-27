@@ -13,13 +13,7 @@ export default function AngularPage() {
       <p className="mb-6">Use the <code>keystrokeTracker</code> directive and <code>KeystrokeService</code> in Angular applications.</p>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Installation</h2>
-      <pre className="mb-6"><code>{`# Download the SDK to your project
-wget -O src/assets/keystroke-core.min.js \\
-  "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
-
-# Add to angular.json scripts or index.html:
-# <script src="assets/keystroke-core.min.js"></script>
-# The SDK exposes a global KeystrokeTracker class`}</code></pre>
+      <pre className="mb-6"><code>{`npm install keystroke-tracker-sdk`}</code></pre>
 
       <h2 className="text-xl font-semibold mt-8 mb-3">Module Setup</h2>
       <pre className="mb-6"><code>{`import { KeystrokeTrackerModule } from "keystroke-tracker-sdk/angular";

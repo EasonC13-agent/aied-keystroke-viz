@@ -18,7 +18,7 @@ export default function InstallPage() {
       <h2 className="text-xl font-semibold mt-8 mb-3">Option 2: wget / curl</h2>
       <p className="mb-3">Download the minified SDK directly from the hosted dashboard:</p>
       <pre className="mb-3"><code>{`# Download the core SDK (<3KB)
-wget -O keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
+npm install keystroke-tracker-sdk
 
 # Or with curl
 curl -o keystroke-core.min.js "https://anonymous.4open.science/api/repo/aied-keystroke-viz/file/public/sdk/dist/keystroke-core.min.js"
