@@ -47,7 +47,8 @@ function evictOldReviewEntries() {
 function saveReviewState(parsed: ParsedState) {
   try {
     const key = csvFingerprint(parsed.headers, parsed.dataRows, parsed.dataRows[0] || []);
-    const map: Record<string, { verdict: "cheater" | "clean" | null; note: string }> & { __ts?: number } = { __ts: Date.now() };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map: Record<string, any> = { __ts: Date.now() };
     parsed.DATA.forEach((d) => {
       if (d.verdict !== null || d.note) {
         map[String(d.rowIdx)] = { verdict: d.verdict, note: d.note };
