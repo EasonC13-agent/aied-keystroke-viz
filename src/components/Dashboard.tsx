@@ -9,6 +9,36 @@ import { KeystrokeSection } from "./dashboard/KeystrokeSection";
 import { ExportSection } from "./dashboard/ExportSection";
 import type { ParsedState, ParticipantData } from "./dashboard/types";
 
+/* ── localStorage persistence helpers ── */
+function csvFingerprint(headers: string[], dataRows: string[][], firstRow: string[]): string {
+  const raw = `${headers.join(",")}|${firstRow.join(",")}|rows=${dataRows.length}|cols=${headers.length}`;
+  // Simple hash (djb2)
+  let h = 5381;
+  for (let i = 0; i < raw.length; i++) h = ((h << 5) + h + raw.charCodeAt(i)) | 0;
+  return "ks-review-" + (h >>> 0).toString(36);
+}
+
+function saveReviewState(parsed: ParsedState) {
+  try {
+    const key = csvFingerprint(parsed.headers, parsed.dataRows, parsed.dataRows[0] || []);
+    const map: Record<string, { verdict: "cheater" | "clean" | null; note: string }> = {};
+    parsed.DATA.forEach((d) => {
+      if (d.verdict !== null || d.note) {
+        map[String(d.rowIdx)] = { verdict: d.verdict, note: d.note };
+      }
+    });
+    localStorage.setItem(key, JSON.stringify(map));
+  } catch { /* quota exceeded or SSR, ignore */ }
+}
+
+function loadReviewState(key: string): Record<string, { verdict: "cheater" | "clean" | null; note: string }> | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
 export default function Dashboard() {
   const [parsed, setParsed] = useState<ParsedState | null>(null);
   const [error, setError] = useState("");
@@ -19,7 +49,15 @@ export default function Dashboard() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const rerender = useCallback(() => forceUpdate((n) => n + 1), []);
+  const rerender = useCallback(() => {
+    forceUpdate((n) => n + 1);
+    // Persist review state on every rerender (verdict/note changes trigger rerender)
+    if (parsedRef.current) saveReviewState(parsedRef.current);
+  }, []);
+
+  // Keep a ref to parsed so rerender callback can access it without stale closure
+  const parsedRef = useRef<ParsedState | null>(null);
+  useEffect(() => { parsedRef.current = parsed; }, [parsed]);
   const getDisplayId = useCallback(
     (id: string) => (isAnon ? anonMap[id] || id : id),
     [isAnon, anonMap]
@@ -53,7 +91,18 @@ export default function Dashboard() {
 
       const durIdx = headers.indexOf("Duration (in seconds)");
       const state = buildDataState({ headers, labelRow, importRow, dataRows, ksIdx, qidToCol, defaultIdCol, durIdx });
-      if (state) { setParsed(state); setError(""); }
+      if (state) {
+        // Restore saved review state from localStorage
+        const key = csvFingerprint(headers, dataRows, dataRows[0] || []);
+        const saved = loadReviewState(key);
+        if (saved) {
+          state.DATA.forEach((d) => {
+            const s = saved[String(d.rowIdx)];
+            if (s) { d.verdict = s.verdict; d.note = s.note; }
+          });
+        }
+        setParsed(state); setError("");
+      }
     } catch (e: unknown) {
       setError("Error parsing CSV: " + (e instanceof Error ? e.message : String(e)));
     }
@@ -106,8 +155,15 @@ export default function Dashboard() {
 
   function changeIdCol(col: string) {
     if (!parsed) return;
-    const newState = buildDataState({ ...parsed, defaultIdCol: col });
-    if (newState) setParsed(newState);
+    const newIdIdx = parsed.headers.indexOf(col);
+    if (newIdIdx === -1) return;
+    // Update each participant's id in-place, preserving verdict/note/flags
+    parsed.DATA.forEach((d) => {
+      d.id = d.row[newIdIdx] || "?";
+    });
+    parsed.idCol = col;
+    setParsed({ ...parsed });
+    rerender();
   }
 
   function handleFile(file: File) {
