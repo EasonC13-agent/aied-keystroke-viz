@@ -18,16 +18,43 @@ function csvFingerprint(headers: string[], dataRows: string[][], firstRow: strin
   return "ks-review-" + (h >>> 0).toString(36);
 }
 
+const KS_REVIEW_PREFIX = "ks-review-";
+const KS_MAX_SAVED = 10;
+
+/** Evict oldest ks-review-* entries when count exceeds KS_MAX_SAVED */
+function evictOldReviewEntries() {
+  try {
+    const entries: { key: string; ts: number }[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(KS_REVIEW_PREFIX)) {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(k) || "{}");
+          entries.push({ key: k, ts: parsed.__ts || 0 });
+        } catch {
+          entries.push({ key: k, ts: 0 });
+        }
+      }
+    }
+    if (entries.length > KS_MAX_SAVED) {
+      entries.sort((a, b) => a.ts - b.ts);
+      const toRemove = entries.length - KS_MAX_SAVED;
+      for (let i = 0; i < toRemove; i++) localStorage.removeItem(entries[i].key);
+    }
+  } catch { /* ignore */ }
+}
+
 function saveReviewState(parsed: ParsedState) {
   try {
     const key = csvFingerprint(parsed.headers, parsed.dataRows, parsed.dataRows[0] || []);
-    const map: Record<string, { verdict: "cheater" | "clean" | null; note: string }> = {};
+    const map: Record<string, { verdict: "cheater" | "clean" | null; note: string }> & { __ts?: number } = { __ts: Date.now() };
     parsed.DATA.forEach((d) => {
       if (d.verdict !== null || d.note) {
         map[String(d.rowIdx)] = { verdict: d.verdict, note: d.note };
       }
     });
     localStorage.setItem(key, JSON.stringify(map));
+    evictOldReviewEntries();
   } catch { /* quota exceeded or SSR, ignore */ }
 }
 
