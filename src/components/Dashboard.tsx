@@ -106,7 +106,28 @@ export default function Dashboard() {
 
       let ksIdx = headers.indexOf("keystroke_log");
       if (ksIdx === -1) ksIdx = headers.indexOf("keystroke_data");
-      if (ksIdx === -1) { setError("Missing required column: keystroke_log or keystroke_data"); return; }
+      if (ksIdx === -1) {
+        ksIdx = headers.findIndex((header, colIdx) => {
+          const sampleValues = dataRows.map((row) => row[colIdx]).filter(Boolean).slice(0, 5);
+          return sampleValues.some((value) => {
+            try {
+              const raw = JSON.parse(value);
+              return (
+                Array.isArray(raw) ||
+                (raw && typeof raw === "object" && (
+                  "data" in raw ||
+                  "keypresses" in raw ||
+                  "keystroke_order" in raw ||
+                  "pastes" in raw
+                ))
+              );
+            } catch {
+              return false;
+            }
+          });
+        });
+      }
+      if (ksIdx === -1) { setError("Missing required keystroke column (e.g. keystroke_log / keystroke_data)"); return; }
 
       const qidToCol: Record<string, string> = {};
       headers.forEach((h, i) => {
@@ -267,7 +288,7 @@ export default function Dashboard() {
             <h4 style={{ color: "var(--text)" }} className="font-semibold mb-2">Expected CSV Format</h4>
             <p>Only two columns are <strong>required</strong>:</p>
             <ul className="mt-2 ml-5 list-disc leading-relaxed">
-              <li><code>keystroke_log</code> (or <code>keystroke_data</code>) - JSON keystroke data</li>
+              <li><code>keystroke_log</code> (or <code>keystroke_data</code>) - JSON keystroke data; renamed variants are auto-detected when possible</li>
               <li>A participant ID column (default: <code>ResponseId</code>)</li>
             </ul>
             <p className="mt-2">Supports both Qualtrics CSVs (3 header rows) and simple CSVs. JSON can use <code>{`{"data":[...]}`}</code> or flat format.</p>

@@ -238,7 +238,7 @@ export function ExportSection({ parsed, getDisplayId, rerender }: Props) {
               onChange={(e) => setExtraIdCol(e.target.value)}
             >
               <option value="">None</option>
-              {headers.filter((h) => h !== "ResponseId" && h !== "keystroke_log").map((h) => <option key={h} value={h}>{h}</option>)}
+              {headers.filter((h) => h !== "ResponseId" && h !== "keystroke_log" && h !== "keystroke_data").map((h) => <option key={h} value={h}>{h}</option>)}
             </select>
             <div className="flex gap-2.5 justify-end">
               <button className="px-5 py-2 border rounded-md text-sm cursor-pointer" style={{ borderColor: "var(--border)", color: "var(--muted)" }} onClick={() => setShowModal(false)}>Cancel</button>

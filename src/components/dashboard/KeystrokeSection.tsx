@@ -102,7 +102,7 @@ function KeystrokeDetail({ d, qLabels, rerender }: { d: ParticipantData; qLabels
 
 export function KeystrokeSection({ parsed, getDisplayId, rerender }: Props) {
   const { DATA, qLabels } = parsed;
-  const [pFilter, setPFilter] = useState<"flagged" | "unreviewed" | "all">("flagged");
+  const [pFilter, setPFilter] = useState<"flagged" | "needs_review" | "not_flagged" | "all">("flagged");
   const [selectedId, setSelectedId] = useState<string>(() => {
     const first = DATA.find((d) => d.isFlagged);
     return first?.id || DATA[0]?.id || "";
@@ -111,7 +111,8 @@ export function KeystrokeSection({ parsed, getDisplayId, rerender }: Props) {
   const filtered = DATA
     .filter((d) => {
       if (pFilter === "flagged") return d.isFlagged;
-      if (pFilter === "unreviewed") return d.isFlagged && d.verdict === null;
+      if (pFilter === "needs_review") return d.isFlagged && d.verdict === null;
+      if (pFilter === "not_flagged") return !d.isFlagged;
       return true;
     })
     .sort((a, b) => {
@@ -132,7 +133,12 @@ export function KeystrokeSection({ parsed, getDisplayId, rerender }: Props) {
     <div>
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--muted)" }}>Show:</span>
-        {(["flagged", "unreviewed", "all"] as const).map((f) => (
+        {([
+          ["flagged", "Flagged Only"],
+          ["needs_review", "Needs Review"],
+          ["not_flagged", "Not Flagged"],
+          ["all", "All Participants"],
+        ] as const).map(([f, label]) => (
           <button
             key={f}
             className="px-3 py-1 border rounded-full text-xs font-semibold cursor-pointer transition-all"
@@ -143,7 +149,7 @@ export function KeystrokeSection({ parsed, getDisplayId, rerender }: Props) {
             }}
             onClick={() => setPFilter(f)}
           >
-            {f === "flagged" ? "Flagged Only" : f === "unreviewed" ? "Unreviewed" : "All Participants"}
+            {label}
           </button>
         ))}
         <span className="text-sm" style={{ color: "var(--muted)" }}>
